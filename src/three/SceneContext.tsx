@@ -13,12 +13,13 @@ export type SceneContextValue = {
   treeContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
   workshopContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
   contactContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
+  buildingsMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
   treeContentsVisible: boolean
   setTreeContentsVisible: (v: boolean) => void
   currentVisibleTreeContent: number | null
   setCurrentVisibleTreeContent: (v: number | null) => void
-  loadedCameras: THREE.Camera[]
-  setLoadedCameras: React.Dispatch<React.SetStateAction<THREE.Camera[]>>
+  loadedCameras: THREE.PerspectiveCamera[]
+  setLoadedCameras: React.Dispatch<React.SetStateAction<THREE.PerspectiveCamera[]>>
   currentCameraIndex: number
   setCurrentCameraIndex: (i: number) => void
 }
@@ -27,7 +28,7 @@ const SceneContext = createContext<SceneContextValue | null>(null)
 
 export function SceneProvider({ children }: { children: React.ReactNode }) {
   const [loadedScenes, setLoadedScenes] = useState<LoadedScene[]>([])
-  const [loadedCameras, setLoadedCameras] = useState<THREE.Camera[]>([])
+  const [loadedCameras, setLoadedCameras] = useState<THREE.PerspectiveCamera[]>([])
   //0 - workshop
   //1 - main
   //2 - about
@@ -40,6 +41,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
   const treeContentMeshes = useRef<THREE.Mesh[]>([])
   const workshopContentMeshes = useRef<THREE.Mesh[]>([])
   const contactContentMeshes = useRef<THREE.Mesh[]>([])
+  const buildingsMeshes = useRef<THREE.Mesh[]>([])
 
   const value: SceneContextValue = useMemo(() => ({
     loadedScenes,
@@ -48,6 +50,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     treeContentMeshes,
     workshopContentMeshes,
     contactContentMeshes,
+    buildingsMeshes,
     treeContentsVisible,
     setTreeContentsVisible,
     currentVisibleTreeContent,
@@ -56,7 +59,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     setLoadedCameras,
     currentCameraIndex,
     setCurrentCameraIndex
-  }), [loadedScenes, treeContentsVisible, currentVisibleTreeContent, loadedCameras, currentCameraIndex, contactContentMeshes])
+  }), [loadedScenes, treeContentsVisible, currentVisibleTreeContent, loadedCameras, currentCameraIndex, contactContentMeshes, buildingsMeshes])
 
   return <SceneContext.Provider value={value}>{children}</SceneContext.Provider>
 }

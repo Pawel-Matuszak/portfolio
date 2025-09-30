@@ -10,7 +10,8 @@ import { useFrame } from '@react-three/fiber'
 export function Cameras() {
   const { camera: baseCamera, set } = useThree()
   const { setLoadedCameras, loadedCameras, currentCameraIndex, setCurrentCameraIndex } = useScene()
-  const baseQuaternionsRef = useRef<Map<THREE.Camera, THREE.Quaternion>>(new Map())
+  const baseQuaternionsRef = useRef<Map<THREE.PerspectiveCamera, THREE.Quaternion>>(new Map())
+  const basePositionsRef = useRef<Map<THREE.PerspectiveCamera, THREE.Vector3>>(new Map())
 
   useEffect(() => {
     const loader = new GLTFLoader()
@@ -19,16 +20,14 @@ export function Cameras() {
     loader.setDRACOLoader(draco)
 
     loader.load(CAMERAS_GLTF_URL, (gltf) => {
-      const cams: THREE.Camera[] = []
+      const cams: THREE.PerspectiveCamera[] = []
       gltf.scene.traverse((child: THREE.Object3D) => {
         const anyChild = child as any
         if (anyChild.isCamera) {
-          let newCam: THREE.Camera | null = null
+          let newCam: THREE.PerspectiveCamera | null = null
           if (anyChild.isPerspectiveCamera) {
             const aspect = (baseCamera as THREE.PerspectiveCamera).aspect
             newCam = new THREE.PerspectiveCamera(anyChild.fov, aspect, anyChild.near, anyChild.far)
-          } else if (anyChild.isOrthographicCamera) {
-            newCam = new THREE.OrthographicCamera(anyChild.left, anyChild.right, anyChild.top, anyChild.bottom, anyChild.near, anyChild.far)
           }
           if (newCam) {
             child.updateMatrixWorld(true)
@@ -52,10 +51,14 @@ export function Cameras() {
     const selected = loadedCameras[currentCameraIndex]
     if (selected) {
       set({ camera: selected as THREE.PerspectiveCamera })
-      // Ensure the selected camera starts from its original orientation
+      // Ensure the selected camera starts from its original orientation and position
       const baseQuat = baseQuaternionsRef.current.get(selected)
+      const basePos = basePositionsRef.current.get(selected)
       if (baseQuat) {
         selected.quaternion.copy(baseQuat)
+      }
+      if (basePos) {
+        selected.position.copy(basePos)
       }
     }
   }, [loadedCameras, currentCameraIndex, set])
@@ -83,19 +86,22 @@ export function Cameras() {
     function onMouseMove(e: MouseEvent) {
       const selected = loadedCameras[currentCameraIndex]
       if (selected) {
-        mouseX.current = e.clientX/window.innerWidth - 0.5
-        mouseY.current = e.clientY/window.innerHeight - 0.5
+        mouseX.current = e.clientX / window.innerWidth - 0.5
+        mouseY.current = e.clientY / window.innerHeight - 0.5
       }
     }
     window.addEventListener('mousemove', onMouseMove)
     return () => window.removeEventListener('mousemove', onMouseMove)
   }, [loadedCameras, currentCameraIndex])
 
-  // Capture and cache each camera's original quaternion once
+  // Capture and cache each camera's original quaternion and position once
   useEffect(() => {
     for (const cam of loadedCameras) {
       if (!baseQuaternionsRef.current.has(cam)) {
         baseQuaternionsRef.current.set(cam, cam.quaternion.clone())
+      }
+      if (!basePositionsRef.current.has(cam)) {
+        basePositionsRef.current.set(cam, cam.position.clone())
       }
     }
   }, [loadedCameras])

@@ -10,7 +10,7 @@ function createMaterialFromTexture(texture?: THREE.Texture) {
 }
 
 export function ModelLoader() {
-  const { setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes } = useScene()
+  const { setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes, buildingsMeshes } = useScene()
 
   // GLTFs are loaded per-scene below with DRACO configured on each loader instance
 
@@ -83,6 +83,10 @@ export function ModelLoader() {
                   (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
                 }
               }
+              if(config.sceneUrl.endsWith('buildings.glb')) {
+                buildingsMeshes.current.push(mesh);
+                (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
+              }
             }
           })
 
@@ -110,7 +114,7 @@ export function ModelLoader() {
 
     loadAll()
     return () => { isCancelled = true }
-  }, [setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes])
+  }, [setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes, buildingsMeshes])
 
   return null
 }

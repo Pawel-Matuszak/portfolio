@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useThree, useFrame } from '@react-three/fiber'
 import { useScene } from './SceneContext'
@@ -11,6 +11,7 @@ export function Interactions() {
     workshopContentMeshes,
     contactContentMeshes,
     loadedScenes,
+    loadedCameras,
     treeContentsVisible,
     setTreeContentsVisible,
     currentVisibleTreeContent,
@@ -20,10 +21,19 @@ export function Interactions() {
 
   const raycaster = useMemo(() => new THREE.Raycaster(), [])
   const mouse = useMemo(() => new THREE.Vector2(), [])
-  const hoverState = useMemo(() => ({ 
+  const hoverState = useMemo(() => ({
     hovered: null as THREE.Mesh | null,
     originalScale: null as THREE.Vector3 | null
   }), [])
+
+  const originalCameraPos = useRef<THREE.Vector3 | null>(null)
+  const hoverEndTime = useRef<number | null>(null)
+
+  // Reset original camera position and hide tree contents when switching cameras
+  useEffect(() => {
+    originalCameraPos.current = null
+    toggleTreeContents(false, currentVisibleTreeContent as number)
+  }, [currentCameraIndex])
 
   useEffect(() => {
     function onMouseMove(event: MouseEvent) {
@@ -56,10 +66,10 @@ export function Interactions() {
           const idx = Number(objectName.replace('TreeContent', ''))
           toggleTreeContents(false, idx)
         }
-      }else{
+      } else {
         //hide tree contents when clicked on other objects
         //camera index 3
-        if(currentCameraIndex === 3){
+        if (currentCameraIndex === 3) {
           toggleTreeContents(false, currentVisibleTreeContent as number)
         }
       }
@@ -71,10 +81,11 @@ export function Interactions() {
       gl.domElement.removeEventListener('mousemove', onMouseMove)
       gl.domElement.removeEventListener('click', onClick)
     }
-  }, [gl, camera, mouse, raycaster, currentVisibleTreeContent, treeContentsVisible, greenSceneMeshes, treeContentMeshes, currentCameraIndex, workshopContentMeshes, contactContentMeshes])
+  }, [gl, camera, mouse, raycaster, currentVisibleTreeContent, treeContentsVisible, greenSceneMeshes, treeContentMeshes, currentCameraIndex, workshopContentMeshes, contactContentMeshes, loadedCameras])
 
   useFrame(() => {
     const allMeshes = [...greenSceneMeshes.current, ...treeContentMeshes.current, ...workshopContentMeshes.current, ...contactContentMeshes.current]
+    const camera = loadedCameras[currentCameraIndex]
     raycaster.setFromCamera(mouse, camera)
     const intersects = raycaster.intersectObjects(allMeshes)
     if (hoverState.hovered) {
@@ -87,24 +98,25 @@ export function Interactions() {
       gl.domElement.style.cursor = 'default'
       hoverState.hovered = null
       hoverState.originalScale = null
+      hoverEndTime.current = Date.now()
     }
     if (intersects.length > 0) {
       const hovered = intersects[0].object as THREE.Mesh
       const original = (hovered.userData as any).originalMaterial
       //hover effect on leaves
       //camera index 3
-      if(currentCameraIndex === 3 && (hovered.name === 'leaves1' || hovered.name === 'leaves2' || hovered.name === 'leaves3' || hovered.name === 'leaves4')){
+      if (currentCameraIndex === 3 && (hovered.name === 'leaves1' || hovered.name === 'leaves2' || hovered.name === 'leaves3' || hovered.name === 'leaves4')) {
         if (original) {
           const hoverMaterial = original.clone()
           if ((hoverMaterial as any).color) (hoverMaterial as any).color.multiplyScalar(1.5)
-            hovered.material = hoverMaterial
+          hovered.material = hoverMaterial
         }
         gl.domElement.style.cursor = 'pointer'
         hoverState.hovered = hovered
       }
       //hover effect on workshop content
       //camera index 0
-      if(currentCameraIndex === 0 && (hovered.name === 'BlueprintContent1' || hovered.name === 'BlueprintContent2' || hovered.name === 'BlueprintContent3' || hovered.name === 'BlueprintContent4')){
+      if (currentCameraIndex === 0 && (hovered.name === 'BlueprintContent1' || hovered.name === 'BlueprintContent2' || hovered.name === 'BlueprintContent3' || hovered.name === 'BlueprintContent4')) {
         if (original) {
           const hoverMaterial = original.clone()
           if ((hoverMaterial as any).color) (hoverMaterial as any).color.multiplyScalar(1.5)
@@ -117,16 +129,41 @@ export function Interactions() {
         }
         gl.domElement.style.cursor = 'pointer'
         hoverState.hovered = hovered
+        if (camera) {
+          // Cache original camera position once at hover start
+          if (!originalCameraPos.current) {
+            originalCameraPos.current = camera.position.clone()
+          }
+          let hoveredPos = new THREE.Vector3(14.9903564453125, 1.845353603363037, -19.42815399169922)
+          let distance = hoveredPos.distanceTo(camera.position)
+          if (distance > 2.2) {
+            camera.position.lerp(hoveredPos, 0.01)
+          }
+        }
       }
+
       //hover effect on contact content
       //camera index 2
-      if(currentCameraIndex === 2 && (hovered.name === 'ContactContent1' || hovered.name === 'ContactContent2' || hovered.name === 'ContactContent3' || hovered.name === 'ContactContent4')){
+      if (currentCameraIndex === 2 && (hovered.name === 'ContactContent1' || hovered.name === 'ContactContent2' || hovered.name === 'ContactContent3' || hovered.name === 'ContactContent4')) {
         if (!hoverState.originalScale) {
           hoverState.originalScale = hovered.scale.clone()
           hovered.scale.multiplyScalar(1.1)
         }
         gl.domElement.style.cursor = 'pointer'
         hoverState.hovered = hovered
+      }
+    }
+
+    if (!hoverState.hovered && originalCameraPos.current && camera) {
+      const now = Date.now()
+      const delay = 250
+      if (hoverEndTime.current && (now - hoverEndTime.current) > delay) {
+        camera.position.lerp(originalCameraPos.current, 0.03)
+        if (camera.position.distanceTo(originalCameraPos.current) < 0.01) {
+          camera.position.copy(originalCameraPos.current)
+          originalCameraPos.current = null
+          hoverEndTime.current = null
+        }
       }
     }
   })
