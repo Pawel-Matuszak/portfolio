@@ -11,10 +11,10 @@ type TreeOverlayContent = {
 }
 
 const DEFAULT_CONTENT: Record<number, TreeOverlayContent> = {
-  1: { title: 'Topic One', description: 'Short description for item one.' },
-  2: { title: 'Topic Two', description: 'Short description for item two.' },
-  3: { title: 'Topic Three', description: 'Short description for item three.' },
-  4: { title: 'Topic Four', description: 'Short description for item four.' }
+  4: { title: 'RTB House – TypeScript Developer', description: 'AI-focused data pipelines and REST APIs (Python & GCP). Built tracking scripts, crawlers, and reporting tools. Solved complex technical issues requiring critical thinking.' },
+  3: { title: 'Anfata Games – Full Stack Developer', description: 'Worked with a US team on a decentralized chat feature. Improved performance and fixed bugs in a Next.js + Firebase stack.' },
+  2: { title: 'CeboTech – Python Developer', description: 'Contributed to AI-driven applications, REST API design, and domain-driven architecture. Focused on clean design and scalable solutions.' },
+  1: { title: 'Storm Gray Unit – Junior Frontend Developer', description: 'Developed React-based admin dashboards for IoT management. Helped design REST APIs to support smooth frontend–backend integration.' }
 }
 
 export function TreeContentOverlays({
@@ -61,7 +61,6 @@ export function TreeContentOverlays({
   return (
     <Fragment>
       <group position={[anchoredPos.x, anchoredPos.y, anchoredPos.z]} quaternion={q}>
-        {/* Corrective rotation so the HTML plane faces outward rather than edge-on */}
         <group rotation={[Math.PI / 2, -Math.PI, -Math.PI / 2]}>
           <Html
             transform
@@ -100,8 +99,8 @@ export function TreeContentOverlays({
             />
           ) : null}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ fontWeight: 700, lineHeight: 1.2 }}>{content.title}</div>
-            <div style={{ fontSize: 14, opacity: 0.9 }}>{content.description}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1.2 }}>{content.title}</div>
+            <div style={{ fontSize: 18, opacity: 0.9 }}>{content.description}</div>
           </div>
           </div>
           </Html>

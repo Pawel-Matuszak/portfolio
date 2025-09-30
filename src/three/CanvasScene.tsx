@@ -6,7 +6,7 @@ import { Interactions } from './Interactions'
 import { Cameras } from './Cameras'
 import { CameraSwitcher } from './CameraSwitcher'
 import { TreeContentOverlays } from '../components/TreeContentOverlays'
-import { OrbitControls } from '@react-three/drei'
+import { Environment, OrbitControls } from '@react-three/drei'
 
 export function CanvasScene() {
   return (
@@ -20,6 +20,8 @@ export function CanvasScene() {
           <Cameras />
           <TreeContentOverlays />
           {/* <OrbitControls enableDamping makeDefault/> */}
+          {/* <Environment preset="park" background /> */}
+          <color attach="background" args={['#87ceeb']} />
         </Canvas>
         <CameraSwitcher />
       </SceneProvider>

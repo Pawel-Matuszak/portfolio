@@ -22,7 +22,6 @@ export function Overlay({
     width: '100%',
     height: '100%',
     zIndex: 1000,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     userSelect: 'none',
     ...style
   }

@@ -87,13 +87,11 @@ export function ModelLoader() {
           })
 
           //hide tree contents by default 
-          //set to true to show tree contents in testing
-          //TODO change to false for production
           if (config.name === 'treeContents-scene') {
-            gltf.visible = true
+            gltf.visible = false
             gltf.traverse((child: THREE.Object3D) => {
               if ((child as any).isMesh && ['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4'].includes(child.name)) {
-                child.visible = true
+                child.visible = false
               }
             })
           }
