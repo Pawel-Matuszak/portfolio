@@ -10,7 +10,7 @@ function createMaterialFromTexture(texture?: THREE.Texture) {
 }
 
 export function ModelLoader() {
-  const { setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes } = useScene()
+  const { setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes } = useScene()
 
   // GLTFs are loaded per-scene below with DRACO configured on each loader instance
 
@@ -59,22 +59,41 @@ export function ModelLoader() {
                 if (['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4'].includes(mesh.name)) {
                   treeContentMeshes.current.push(mesh)
                   ;(mesh.userData as any).originalMaterial = (material as THREE.Material).clone()
+                  // Make plane invisible but raycastable so we can anchor HTML without seeing the square
+                  const invisible = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
+                  ;(invisible as any).depthWrite = false
+                  mesh.material = invisible
                 }
               }
               if (config.sceneUrl.endsWith('blueprintContents.glb')) {
                 if (['BlueprintContent1', 'BlueprintContent2', 'BlueprintContent3', 'BlueprintContent4'].includes(mesh.name)) {
-                  workshopContentMeshes.current.push(mesh)
-                  ;(mesh.userData as any).originalMaterial = (material as THREE.Material).clone()
+                  workshopContentMeshes.current.push(mesh);
+                  const tex = textureLoader.load(`/static/${mesh.name}.png`)
+                  Object.assign(tex, config.textureSettings)
+                  mesh.material = new THREE.MeshBasicMaterial({ map: tex });
+                  (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
+                }
+              }
+              if(config.sceneUrl.endsWith('contactContents.glb')) {
+                if (['ContactContent1', 'ContactContent2', 'ContactContent3', 'ContactContent4'].includes(mesh.name)) {
+                  contactContentMeshes.current.push(mesh);
+                  const tex = textureLoader.load(`/static/${mesh.name}.png`)
+                  Object.assign(tex, config.textureSettings)
+                  mesh.material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+                  (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
                 }
               }
             }
           })
 
+          //hide tree contents by default 
+          //set to true to show tree contents in testing
+          //TODO change to false for production
           if (config.name === 'treeContents-scene') {
-            gltf.visible = false
+            gltf.visible = true
             gltf.traverse((child: THREE.Object3D) => {
               if ((child as any).isMesh && ['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4'].includes(child.name)) {
-                child.visible = false
+                child.visible = true
               }
             })
           }
@@ -93,7 +112,7 @@ export function ModelLoader() {
 
     loadAll()
     return () => { isCancelled = true }
-  }, [setLoadedScenes, greenSceneMeshes, treeContentMeshes])
+  }, [setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes])
 
   return null
 }

@@ -5,6 +5,8 @@ import { World } from './World'
 import { Interactions } from './Interactions'
 import { Cameras } from './Cameras'
 import { CameraSwitcher } from './CameraSwitcher'
+import { TreeContentOverlays } from '../components/TreeContentOverlays'
+import { OrbitControls } from '@react-three/drei'
 
 export function CanvasScene() {
   return (
@@ -16,6 +18,7 @@ export function CanvasScene() {
           <World />
           <Interactions />
           <Cameras />
+          <TreeContentOverlays />
           {/* <OrbitControls enableDamping makeDefault/> */}
         </Canvas>
         <CameraSwitcher />

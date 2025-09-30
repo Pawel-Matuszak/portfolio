@@ -12,6 +12,7 @@ export type SceneContextValue = {
   greenSceneMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
   treeContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
   workshopContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
+  contactContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
   treeContentsVisible: boolean
   setTreeContentsVisible: (v: boolean) => void
   currentVisibleTreeContent: number | null
@@ -38,6 +39,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
   const greenSceneMeshes = useRef<THREE.Mesh[]>([])
   const treeContentMeshes = useRef<THREE.Mesh[]>([])
   const workshopContentMeshes = useRef<THREE.Mesh[]>([])
+  const contactContentMeshes = useRef<THREE.Mesh[]>([])
 
   const value: SceneContextValue = useMemo(() => ({
     loadedScenes,
@@ -45,6 +47,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     greenSceneMeshes,
     treeContentMeshes,
     workshopContentMeshes,
+    contactContentMeshes,
     treeContentsVisible,
     setTreeContentsVisible,
     currentVisibleTreeContent,
@@ -53,7 +56,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     setLoadedCameras,
     currentCameraIndex,
     setCurrentCameraIndex
-  }), [loadedScenes, treeContentsVisible, currentVisibleTreeContent, loadedCameras, currentCameraIndex])
+  }), [loadedScenes, treeContentsVisible, currentVisibleTreeContent, loadedCameras, currentCameraIndex, contactContentMeshes])
 
   return <SceneContext.Provider value={value}>{children}</SceneContext.Provider>
 }

@@ -9,6 +9,7 @@ export function Interactions() {
     greenSceneMeshes,
     treeContentMeshes,
     workshopContentMeshes,
+    contactContentMeshes,
     loadedScenes,
     treeContentsVisible,
     setTreeContentsVisible,
@@ -70,10 +71,10 @@ export function Interactions() {
       gl.domElement.removeEventListener('mousemove', onMouseMove)
       gl.domElement.removeEventListener('click', onClick)
     }
-  }, [gl, camera, mouse, raycaster, currentVisibleTreeContent, treeContentsVisible, greenSceneMeshes, treeContentMeshes, currentCameraIndex, workshopContentMeshes])
+  }, [gl, camera, mouse, raycaster, currentVisibleTreeContent, treeContentsVisible, greenSceneMeshes, treeContentMeshes, currentCameraIndex, workshopContentMeshes, contactContentMeshes])
 
   useFrame(() => {
-    const allMeshes = [...greenSceneMeshes.current, ...treeContentMeshes.current, ...workshopContentMeshes.current]
+    const allMeshes = [...greenSceneMeshes.current, ...treeContentMeshes.current, ...workshopContentMeshes.current, ...contactContentMeshes.current]
     raycaster.setFromCamera(mouse, camera)
     const intersects = raycaster.intersectObjects(allMeshes)
     if (hoverState.hovered) {
@@ -110,6 +111,16 @@ export function Interactions() {
           hovered.material = hoverMaterial
         }
         // Store original scale and apply hover scale
+        if (!hoverState.originalScale) {
+          hoverState.originalScale = hovered.scale.clone()
+          hovered.scale.multiplyScalar(1.1)
+        }
+        gl.domElement.style.cursor = 'pointer'
+        hoverState.hovered = hovered
+      }
+      //hover effect on contact content
+      //camera index 2
+      if(currentCameraIndex === 2 && (hovered.name === 'ContactContent1' || hovered.name === 'ContactContent2' || hovered.name === 'ContactContent3' || hovered.name === 'ContactContent4')){
         if (!hoverState.originalScale) {
           hoverState.originalScale = hovered.scale.clone()
           hovered.scale.multiplyScalar(1.1)
