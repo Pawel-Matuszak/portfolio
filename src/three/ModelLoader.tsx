@@ -52,16 +52,16 @@ export function ModelLoader() {
               if (config.sceneUrl.endsWith('green.glb')) {
                 if (['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(mesh.name)) {
                   greenSceneMeshes.current.push(mesh)
-                  ;(mesh.userData as any).originalMaterial = (material as THREE.Material).clone()
+                    ; (mesh.userData as any).originalMaterial = (material as THREE.Material).clone()
                 }
               }
               if (config.sceneUrl.endsWith('treeContents.glb')) {
-                if (['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4'].includes(mesh.name)) {
+                if (['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4', 'TreeHoverContent'].includes(mesh.name)) {
                   treeContentMeshes.current.push(mesh)
-                  ;(mesh.userData as any).originalMaterial = (material as THREE.Material).clone()
+                    ; (mesh.userData as any).originalMaterial = (material as THREE.Material).clone()
                   // Make plane invisible but raycastable so we can anchor HTML without seeing the square
                   const invisible = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
-                  ;(invisible as any).depthWrite = false
+                    ; (invisible as any).depthWrite = false
                   mesh.material = invisible
                 }
               }
@@ -74,7 +74,7 @@ export function ModelLoader() {
                   (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
                 }
               }
-              if(config.sceneUrl.endsWith('contactContents.glb')) {
+              if (config.sceneUrl.endsWith('contactContents.glb')) {
                 if (['ContactContent1', 'ContactContent2', 'ContactContent3', 'ContactContent4'].includes(mesh.name)) {
                   contactContentMeshes.current.push(mesh);
                   const tex = textureLoader.load(`/static/${mesh.name}.png`)
@@ -83,7 +83,7 @@ export function ModelLoader() {
                   (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
                 }
               }
-              if(config.sceneUrl.endsWith('buildings.glb')) {
+              if (config.sceneUrl.endsWith('buildings.glb')) {
                 buildingsMeshes.current.push(mesh);
                 (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
               }
@@ -94,7 +94,7 @@ export function ModelLoader() {
           if (config.name === 'treeContents-scene') {
             gltf.visible = false
             gltf.traverse((child: THREE.Object3D) => {
-              if ((child as any).isMesh && ['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4'].includes(child.name)) {
+              if ((child as any).isMesh && ['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4', 'TreeHoverContent'].includes(child.name)) {
                 child.visible = false
               }
             })

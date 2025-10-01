@@ -105,7 +105,7 @@ export function Interactions() {
       const original = (hovered.userData as any).originalMaterial
       //hover effect on leaves
       //camera index 3
-      if (currentCameraIndex === 3 && (hovered.name === 'leaves1' || hovered.name === 'leaves2' || hovered.name === 'leaves3' || hovered.name === 'leaves4')) {
+      if (currentCameraIndex === 3 && (hovered.name === 'leaves1' || hovered.name === 'leaves2' || hovered.name === 'leaves3' || hovered.name === 'leaves4' || hovered.name === 'TreeHoverContent')) {
         if (original) {
           const hoverMaterial = original.clone()
           if ((hoverMaterial as any).color) (hoverMaterial as any).color.multiplyScalar(1.5)
@@ -113,7 +113,26 @@ export function Interactions() {
         }
         gl.domElement.style.cursor = 'pointer'
         hoverState.hovered = hovered
+
+        if (camera) {
+          // Cache original camera position once at hover start
+          if (!originalCameraPos.current) {
+            originalCameraPos.current = camera.position.clone()
+          }
+          let hoveredPos = new THREE.Vector3(
+            45.888423919677734,
+            8.197944641113281,
+            3.8714218139648438
+          )
+          let distance = hoveredPos.distanceTo(camera.position)
+          if (distance > 24) {
+            camera.position.lerp(hoveredPos, 0.05)
+          }
+        }
       }
+      //zoom camera on hover
+      //camera index 3
+
       //hover effect on workshop content
       //camera index 0
       if (currentCameraIndex === 0 && (hovered.name === 'BlueprintContent1' || hovered.name === 'BlueprintContent2' || hovered.name === 'BlueprintContent3' || hovered.name === 'BlueprintContent4')) {
@@ -129,6 +148,7 @@ export function Interactions() {
         }
         gl.domElement.style.cursor = 'pointer'
         hoverState.hovered = hovered
+        //Zoom camera to hovered position
         if (camera) {
           // Cache original camera position once at hover start
           if (!originalCameraPos.current) {
