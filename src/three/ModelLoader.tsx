@@ -66,7 +66,7 @@ export function ModelLoader() {
                 }
               }
               if (config.sceneUrl.endsWith('blueprintContents.glb')) {
-                if (['BlueprintContent1', 'BlueprintContent2', 'BlueprintContent3', 'BlueprintContent4'].includes(mesh.name)) {
+                if (['BlueprintContent1', 'BlueprintContent2', 'BlueprintContent3', 'BlueprintContent4', 'BlueprintHoverContent'].includes(mesh.name)) {
                   workshopContentMeshes.current.push(mesh);
                   const tex = textureLoader.load(`/static/${mesh.name}.png`)
                   Object.assign(tex, config.textureSettings)
@@ -95,6 +95,15 @@ export function ModelLoader() {
             gltf.visible = false
             gltf.traverse((child: THREE.Object3D) => {
               if ((child as any).isMesh && ['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4', 'TreeHoverContent'].includes(child.name)) {
+                child.visible = false
+              }
+            })
+          }
+          //hide blueprint contents by default
+          if (config.name === 'blueprintContents-scene') {
+            gltf.visible = true
+            gltf.traverse((child: THREE.Object3D) => {
+              if ((child as any).isMesh && ['BlueprintHoverContent'].includes(child.name)) {
                 child.visible = false
               }
             })

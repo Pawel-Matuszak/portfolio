@@ -114,6 +114,8 @@ export function Interactions() {
         gl.domElement.style.cursor = 'pointer'
         hoverState.hovered = hovered
 
+        //zoom camera on hover
+        //camera index 3
         if (camera) {
           // Cache original camera position once at hover start
           if (!originalCameraPos.current) {
@@ -126,23 +128,22 @@ export function Interactions() {
           )
           let distance = hoveredPos.distanceTo(camera.position)
           if (distance > 24) {
-            camera.position.lerp(hoveredPos, 0.05)
+            camera.position.lerp(hoveredPos, 0.02)
           }
         }
       }
-      //zoom camera on hover
-      //camera index 3
+
 
       //hover effect on workshop content
       //camera index 0
-      if (currentCameraIndex === 0 && (hovered.name === 'BlueprintContent1' || hovered.name === 'BlueprintContent2' || hovered.name === 'BlueprintContent3' || hovered.name === 'BlueprintContent4')) {
+      if (currentCameraIndex === 0 && (hovered.name === 'BlueprintContent1' || hovered.name === 'BlueprintContent2' || hovered.name === 'BlueprintContent3' || hovered.name === 'BlueprintContent4' || hovered.name === 'BlueprintHoverContent')) {
         if (original) {
           const hoverMaterial = original.clone()
           if ((hoverMaterial as any).color) (hoverMaterial as any).color.multiplyScalar(1.5)
           hovered.material = hoverMaterial
         }
         // Store original scale and apply hover scale
-        if (!hoverState.originalScale) {
+        if (!hoverState.originalScale && hovered.name !== 'BlueprintHoverContent') {
           hoverState.originalScale = hovered.scale.clone()
           hovered.scale.multiplyScalar(1.1)
         }
@@ -156,8 +157,8 @@ export function Interactions() {
           }
           let hoveredPos = new THREE.Vector3(14.9903564453125, 1.845353603363037, -19.42815399169922)
           let distance = hoveredPos.distanceTo(camera.position)
-          if (distance > 2.2) {
-            camera.position.lerp(hoveredPos, 0.01)
+          if (distance > 2.4) {
+            camera.position.lerp(hoveredPos, 0.02)
           }
         }
       }
@@ -175,16 +176,16 @@ export function Interactions() {
     }
 
     if (!hoverState.hovered && originalCameraPos.current && camera) {
-      const now = Date.now()
-      const delay = 250
-      if (hoverEndTime.current && (now - hoverEndTime.current) > delay) {
-        camera.position.lerp(originalCameraPos.current, 0.03)
-        if (camera.position.distanceTo(originalCameraPos.current) < 0.01) {
-          camera.position.copy(originalCameraPos.current)
-          originalCameraPos.current = null
-          hoverEndTime.current = null
-        }
+      // const now = Date.now()
+      // const delay = 250
+      // if (hoverEndTime.current && (now - hoverEndTime.current) > delay) {
+      camera.position.lerp(originalCameraPos.current, 0.05)
+      if (camera.position.distanceTo(originalCameraPos.current) < 0.01) {
+        camera.position.copy(originalCameraPos.current)
+        originalCameraPos.current = null
+        // hoverEndTime.current = null
       }
+      // }
     }
   })
 
