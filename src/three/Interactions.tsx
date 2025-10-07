@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useThree, useFrame } from '@react-three/fiber'
 import { useScene } from './SceneContext'
+import { BLUEPRINT_LINKS, CONTACT_LINKS } from './sceneConfigs'
 
 export function Interactions() {
   const { gl, camera } = useThree()
@@ -42,7 +43,12 @@ export function Interactions() {
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
     }
     function onClick() {
-      const allMeshes = [...greenSceneMeshes.current, ...treeContentMeshes.current]
+      const allMeshes = [
+        ...greenSceneMeshes.current,
+        ...treeContentMeshes.current,
+        ...workshopContentMeshes.current,
+        ...contactContentMeshes.current
+      ]
       raycaster.setFromCamera(mouse, camera)
       const intersects = raycaster.intersectObjects(allMeshes)
       if (intersects.length > 0) {
@@ -65,6 +71,28 @@ export function Interactions() {
         ].includes(objectName)) {
           const idx = Number(objectName.replace('TreeContent', ''))
           toggleTreeContents(false, idx)
+        } else if (currentCameraIndex === 2 && [
+          'ContactContent1',
+          'ContactContent2',
+          'ContactContent3',
+          'ContactContent4'
+        ].includes(objectName)) {
+          const contactLinks: Record<string, string> = CONTACT_LINKS
+          const url = contactLinks[objectName]
+          if (url) {
+            window.open(url, '_blank', 'noopener,noreferrer')
+          }
+        } else if (currentCameraIndex === 0 && [
+          'BlueprintContent1',
+          'BlueprintContent2',
+          'BlueprintContent3',
+          'BlueprintContent4'
+        ].includes(objectName)) {
+          const blueprintLinks: Record<string, string> = BLUEPRINT_LINKS
+          const url = blueprintLinks[objectName]
+          if (url) {
+            window.open(url, '_blank', 'noopener,noreferrer')
+          }
         }
       } else {
         //hide tree contents when clicked on other objects

@@ -20,6 +20,7 @@ export interface SceneContextValue {
   islandWorkshopOutline: React.MutableRefObject<THREE.Group | null>
   islandTreeOutline: React.MutableRefObject<THREE.Group | null>
   islandContactOutline: React.MutableRefObject<THREE.Group | null>
+  navContentMeshes: React.MutableRefObject<THREE.Mesh[]>
   treeContentsVisible: boolean
   setTreeContentsVisible: (v: boolean) => void
   currentVisibleTreeContent: number | null
@@ -54,6 +55,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
   const islandWorkshopOutline = useRef<THREE.Group | null>(null)
   const islandTreeOutline = useRef<THREE.Group | null>(null)
   const islandContactOutline = useRef<THREE.Group | null>(null)
+  const navContentMeshes = useRef<THREE.Mesh[]>([])
 
   const value: SceneContextValue = useMemo(() => ({
     loadedScenes,
@@ -69,6 +71,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     islandWorkshopOutline,
     islandTreeOutline,
     islandContactOutline,
+    navContentMeshes,
     treeContentsVisible,
     setTreeContentsVisible,
     currentVisibleTreeContent,
@@ -87,7 +90,8 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     buildingsMeshes,
     islandWorkshopMeshes,
     islandTreeMeshes,
-    islandContactMeshes
+    islandContactMeshes,
+    navContentMeshes
   ])
 
   return <SceneContext.Provider value={value}>{children}</SceneContext.Provider>

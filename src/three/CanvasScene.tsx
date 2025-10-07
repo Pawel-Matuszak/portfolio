@@ -19,7 +19,7 @@ export function CanvasScene() {
           <Interactions />
           <Cameras />
           <TreeContentOverlays />
-          {/* <OrbitControls enableDamping makeDefault/> */}
+          {/* <OrbitControls enableDamping makeDefault /> */}
           {/* <Environment preset="park" background /> */}
           <color attach="background" args={['#87ceeb']} />
         </Canvas>

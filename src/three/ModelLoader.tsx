@@ -22,7 +22,8 @@ export function ModelLoader() {
     islandContactMeshes,
     islandWorkshopOutline,
     islandTreeOutline,
-    islandContactOutline
+    islandContactOutline,
+    navContentMeshes,
   } = useScene()
 
   // GLTFs are loaded per-scene below with DRACO configured on each loader instance
@@ -62,6 +63,7 @@ export function ModelLoader() {
             if (child instanceof THREE.Mesh) {
               const mesh = child as THREE.Mesh
               mesh.material = material
+
               if (config.sceneUrl.endsWith('green.glb')) {
                 if (['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(mesh.name)) {
                   greenSceneMeshes.current.push(mesh)
@@ -164,10 +166,10 @@ export function ModelLoader() {
       // After all scenes loaded, create scaled outline meshes for island groups
       try {
         const outlineMaterial = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
+          color: new THREE.Color(5, 5, 5),
           side: THREE.BackSide,
           transparent: true,
-          opacity: 0.6
+          opacity: 0.7,
         })
 
         const outlinesGroup = new THREE.Group()
@@ -209,7 +211,6 @@ export function ModelLoader() {
             outlineMesh.visible = false
             outlineMesh.position.copy(mesh.position)
             outlineMesh.rotation.copy(mesh.rotation)
-            outlineMesh.scale.set(1, 1, 1)
             workshopGroup.add(outlineMesh)
           }
           islandWorkshopOutline.current = workshopGroup
@@ -226,7 +227,6 @@ export function ModelLoader() {
             outlineMesh.visible = false
             outlineMesh.position.copy(mesh.position)
             outlineMesh.rotation.copy(mesh.rotation)
-            outlineMesh.scale.set(1, 1, 1)
             treeGroup.add(outlineMesh)
           }
           islandTreeOutline.current = treeGroup
@@ -243,7 +243,6 @@ export function ModelLoader() {
             outlineMesh.visible = false
             outlineMesh.position.copy(mesh.position)
             outlineMesh.rotation.copy(mesh.rotation)
-            outlineMesh.scale.set(1, 1, 1)
             contactGroup.add(outlineMesh)
           }
           islandContactOutline.current = contactGroup
@@ -278,7 +277,8 @@ export function ModelLoader() {
     islandContactMeshes,
     islandWorkshopOutline,
     islandTreeOutline,
-    islandContactOutline
+    islandContactOutline,
+    navContentMeshes,
   ])
 
   return null

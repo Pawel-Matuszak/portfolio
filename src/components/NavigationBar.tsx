@@ -10,10 +10,10 @@ interface NavigationBarProps {
   className?: string
 }
 
-export function NavigationBar({ 
-  onBackClick, 
-  onCameraClick, 
-  cameras, 
+export function NavigationBar({
+  onBackClick,
+  onCameraClick,
+  cameras,
   currentCameraIndex,
   style = {},
   className = ''
@@ -39,9 +39,9 @@ export function NavigationBar({
         Back
       </Button>
       {availableCameras.map(({ name, index }) => (
-        <Button 
-          key={index} 
-          onClick={() => onCameraClick(index)} 
+        <Button
+          key={index}
+          onClick={() => onCameraClick(index)}
           size="large"
           variant="secondary"
         >
