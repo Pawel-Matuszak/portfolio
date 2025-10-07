@@ -50,7 +50,7 @@ export function Cameras() {
   useEffect(() => {
     const selected = loadedCameras[currentCameraIndex]
     if (selected) {
-      set({ camera: selected as THREE.PerspectiveCamera })
+      set({ camera: selected })
       // Ensure the selected camera starts from its original orientation and position
       const baseQuat = baseQuaternionsRef.current.get(selected)
       const basePos = basePositionsRef.current.get(selected)

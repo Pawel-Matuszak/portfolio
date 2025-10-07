@@ -1,5 +1,4 @@
 import React from 'react'
-import { Button } from './Button'
 
 interface CameraOption {
   name: string
@@ -9,15 +8,19 @@ interface CameraOption {
 interface CameraGridProps {
   cameras: CameraOption[]
   onCameraSelect: (index: number) => void
+  onHoverStart?: (index: number) => void
+  onHoverEnd?: () => void
   style?: React.CSSProperties
   className?: string
 }
 
-export function CameraGrid({ 
-  cameras, 
-  onCameraSelect, 
-  style = {}, 
-  className = '' 
+export function CameraGrid({
+  cameras,
+  onCameraSelect,
+  onHoverStart,
+  onHoverEnd,
+  style = {},
+  className = ''
 }: CameraGridProps) {
   const gridStyles: React.CSSProperties = {
     display: 'grid',
@@ -45,13 +48,18 @@ export function CameraGrid({
         <div
           key={index}
           style={cellStyles}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
+          onMouseEnter={() => {
+            // e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.1)'
+            onHoverStart?.(index)
           }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0)'
+          onMouseLeave={() => {
+            // e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0)'
+            onHoverEnd?.()
           }}
-          onClick={() => onCameraSelect(index)}
+          onClick={() => {
+            onCameraSelect(index)
+            onHoverEnd?.()
+          }}
         >
           <div style={{
             fontSize: '32px',

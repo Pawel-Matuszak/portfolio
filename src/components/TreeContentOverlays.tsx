@@ -4,7 +4,7 @@ import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useScene } from '../three/SceneContext'
 
-type TreeOverlayContent = {
+interface TreeOverlayContent {
   title: string
   description: string
   imageUrl?: string

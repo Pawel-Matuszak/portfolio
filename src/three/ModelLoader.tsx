@@ -10,7 +10,20 @@ function createMaterialFromTexture(texture?: THREE.Texture) {
 }
 
 export function ModelLoader() {
-  const { setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes, buildingsMeshes } = useScene()
+  const {
+    setLoadedScenes,
+    greenSceneMeshes,
+    treeContentMeshes,
+    workshopContentMeshes,
+    contactContentMeshes,
+    buildingsMeshes,
+    islandWorkshopMeshes,
+    islandTreeMeshes,
+    islandContactMeshes,
+    islandWorkshopOutline,
+    islandTreeOutline,
+    islandContactOutline
+  } = useScene()
 
   // GLTFs are loaded per-scene below with DRACO configured on each loader instance
 
@@ -41,27 +54,27 @@ export function ModelLoader() {
               config.sceneUrl,
               (g) => resolve(g.scene),
               undefined,
-              (e) => reject(e)
+              (e) => reject(e instanceof Error ? e : new Error(String(e)))
             )
           })
 
           gltf.traverse((child: THREE.Object3D) => {
-            if ((child as any).isMesh) {
+            if (child instanceof THREE.Mesh) {
               const mesh = child as THREE.Mesh
               mesh.material = material
               if (config.sceneUrl.endsWith('green.glb')) {
                 if (['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(mesh.name)) {
                   greenSceneMeshes.current.push(mesh)
-                    ; (mesh.userData as any).originalMaterial = (material as THREE.Material).clone()
+                    ; (mesh.userData as Record<string, unknown>).originalMaterial = (material).clone()
                 }
               }
               if (config.sceneUrl.endsWith('treeContents.glb')) {
                 if (['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4', 'TreeHoverContent'].includes(mesh.name)) {
                   treeContentMeshes.current.push(mesh)
-                    ; (mesh.userData as any).originalMaterial = (material as THREE.Material).clone()
+                    ; (mesh.userData as Record<string, unknown>).originalMaterial = (material).clone()
                   // Make plane invisible but raycastable so we can anchor HTML without seeing the square
                   const invisible = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
-                    ; (invisible as any).depthWrite = false
+                    ; (invisible as unknown as { depthWrite: boolean }).depthWrite = false
                   mesh.material = invisible
                 }
               }
@@ -71,7 +84,10 @@ export function ModelLoader() {
                   const tex = textureLoader.load(`/static/${mesh.name}.png`)
                   Object.assign(tex, config.textureSettings)
                   mesh.material = new THREE.MeshBasicMaterial({ map: tex });
-                  (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
+                  if (mesh.material?.clone) {
+                    const cloned = mesh.material.clone()
+                      ; (mesh.userData as Record<string, unknown>).originalMaterial = cloned
+                  }
                 }
               }
               if (config.sceneUrl.endsWith('contactContents.glb')) {
@@ -80,12 +96,30 @@ export function ModelLoader() {
                   const tex = textureLoader.load(`/static/${mesh.name}.png`)
                   Object.assign(tex, config.textureSettings)
                   mesh.material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-                  (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
+                  if (mesh.material?.clone) {
+                    const cloned = mesh.material.clone()
+                      ; (mesh.userData as Record<string, unknown>).originalMaterial = cloned
+                  }
                 }
               }
               if (config.sceneUrl.endsWith('buildings.glb')) {
                 buildingsMeshes.current.push(mesh);
-                (mesh.userData as any).originalMaterial = (mesh.material as THREE.Material).clone()
+                if (mesh.material?.clone) {
+                  const cloned = mesh.material.clone()
+                    ; (mesh.userData as Record<string, unknown>).originalMaterial = cloned
+                }
+              }
+              //Group island meshes
+              if (config.sceneUrl.endsWith('island-hover.glb')) {
+                if (['Workshop'].includes(mesh.name)) {
+                  islandWorkshopMeshes.current.push(mesh);
+                }
+                if (['Tree'].includes(mesh.name)) {
+                  islandTreeMeshes.current.push(mesh);
+                }
+                if (['Lighthouse'].includes(mesh.name)) {
+                  islandContactMeshes.current.push(mesh);
+                }
               }
             }
           })
@@ -94,7 +128,7 @@ export function ModelLoader() {
           if (config.name === 'treeContents-scene') {
             gltf.visible = false
             gltf.traverse((child: THREE.Object3D) => {
-              if ((child as any).isMesh && ['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4', 'TreeHoverContent'].includes(child.name)) {
+              if (child instanceof THREE.Mesh && ['TreeContent1', 'TreeContent2', 'TreeContent3', 'TreeContent4', 'TreeHoverContent'].includes(child.name)) {
                 child.visible = false
               }
             })
@@ -103,7 +137,16 @@ export function ModelLoader() {
           if (config.name === 'blueprintContents-scene') {
             gltf.visible = true
             gltf.traverse((child: THREE.Object3D) => {
-              if ((child as any).isMesh && ['BlueprintHoverContent'].includes(child.name)) {
+              if (child instanceof THREE.Mesh && ['BlueprintHoverContent'].includes(child.name)) {
+                child.visible = false
+              }
+            })
+          }
+          //hide island hover contents by default
+          if (config.name === 'island-hover') {
+            gltf.visible = true
+            gltf.traverse((child: THREE.Object3D) => {
+              if (child instanceof THREE.Mesh && ['Workshop', 'Tree', 'Lighthouse'].includes(child.name)) {
                 child.visible = false
               }
             })
@@ -118,12 +161,125 @@ export function ModelLoader() {
           console.error('Failed to load scene config:', config.name, e)
         }
       }
+      // After all scenes loaded, create scaled outline meshes for island groups
+      try {
+        const outlineMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          side: THREE.BackSide,
+          transparent: true,
+          opacity: 0.6
+        })
+
+        const outlinesGroup = new THREE.Group()
+        function expandGeometry(geometry: THREE.BufferGeometry, expansionAmount = 0.1) {
+          const expandedGeometry = geometry.clone()
+
+          // Ensure we have normals
+          expandedGeometry.computeVertexNormals()
+
+          const positionAttribute = expandedGeometry.getAttribute('position')
+          const normalAttribute = expandedGeometry.getAttribute('normal')
+          const positions = positionAttribute.array as Float32Array
+          const normals = normalAttribute.array as Float32Array
+
+          // Expand each vertex along its normal
+          for (let i = 0; i < positions.length; i += 3) {
+            const normalX = normals[i]
+            const normalY = normals[i + 1]
+            const normalZ = normals[i + 2]
+
+            positions[i] += normalX * expansionAmount
+            positions[i + 1] += normalY * expansionAmount
+            positions[i + 2] += normalZ * expansionAmount
+          }
+
+          // Update the position attribute
+          positionAttribute.needsUpdate = true
+
+          return expandedGeometry
+        }
+
+        // Create scaled outline meshes for workshop group
+        if (islandWorkshopMeshes.current.length > 0) {
+          const workshopGroup = new THREE.Group()
+          for (const mesh of islandWorkshopMeshes.current) {
+            const expandedGeometry = expandGeometry(mesh.geometry)
+            const outlineMesh = new THREE.Mesh(expandedGeometry, outlineMaterial.clone())
+            outlineMesh.material = outlineMaterial.clone()
+            outlineMesh.visible = false
+            outlineMesh.position.copy(mesh.position)
+            outlineMesh.rotation.copy(mesh.rotation)
+            outlineMesh.scale.set(1, 1, 1)
+            workshopGroup.add(outlineMesh)
+          }
+          islandWorkshopOutline.current = workshopGroup
+          outlinesGroup.add(workshopGroup)
+          console.log('Created workshop outline group with', workshopGroup.children.length, 'meshes')
+        }
+
+        if (islandTreeMeshes.current.length > 0) {
+          const treeGroup = new THREE.Group()
+          for (const mesh of islandTreeMeshes.current) {
+            const expandedGeometry = expandGeometry(mesh.geometry)
+            const outlineMesh = new THREE.Mesh(expandedGeometry, outlineMaterial.clone())
+            outlineMesh.material = outlineMaterial.clone()
+            outlineMesh.visible = false
+            outlineMesh.position.copy(mesh.position)
+            outlineMesh.rotation.copy(mesh.rotation)
+            outlineMesh.scale.set(1, 1, 1)
+            treeGroup.add(outlineMesh)
+          }
+          islandTreeOutline.current = treeGroup
+          outlinesGroup.add(treeGroup)
+          console.log('Created tree outline group with', treeGroup.children.length, 'meshes')
+        }
+
+        if (islandContactMeshes.current.length > 0) {
+          const contactGroup = new THREE.Group()
+          for (const mesh of islandContactMeshes.current) {
+            const expandedGeometry = expandGeometry(mesh.geometry)
+            const outlineMesh = new THREE.Mesh(expandedGeometry, outlineMaterial.clone())
+            outlineMesh.material = outlineMaterial.clone()
+            outlineMesh.visible = false
+            outlineMesh.position.copy(mesh.position)
+            outlineMesh.rotation.copy(mesh.rotation)
+            outlineMesh.scale.set(1, 1, 1)
+            contactGroup.add(outlineMesh)
+          }
+          islandContactOutline.current = contactGroup
+          outlinesGroup.add(contactGroup)
+          console.log('Created contact outline group with', contactGroup.children.length, 'meshes')
+        }
+
+        if (outlinesGroup.children.length > 0) {
+          results.push({ name: 'island-outlines', scene: outlinesGroup })
+          console.log('Added island-outlines scene with', outlinesGroup.children.length, 'groups')
+        } else {
+          console.log('No outline groups created')
+        }
+      } catch (err) {
+        console.error('Failed to create island outlines', err)
+      }
+
       if (!isCancelled) setLoadedScenes(results)
     }
 
-    loadAll()
+    void loadAll()
     return () => { isCancelled = true }
-  }, [setLoadedScenes, greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes, buildingsMeshes])
+  }, [
+    setLoadedScenes,
+    greenSceneMeshes,
+    treeContentMeshes,
+    workshopContentMeshes,
+    contactContentMeshes,
+    buildingsMeshes,
+    islandWorkshopMeshes,
+    islandTreeMeshes,
+    islandContactMeshes,
+    islandWorkshopOutline,
+    islandTreeOutline,
+    islandContactOutline
+  ])
 
   return null
 }

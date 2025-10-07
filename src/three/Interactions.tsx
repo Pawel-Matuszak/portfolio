@@ -32,12 +32,12 @@ export function Interactions() {
   // Reset original camera position and hide tree contents when switching cameras
   useEffect(() => {
     originalCameraPos.current = null
-    toggleTreeContents(false, currentVisibleTreeContent as number)
+    toggleTreeContents(false, currentVisibleTreeContent!)
   }, [currentCameraIndex])
 
   useEffect(() => {
     function onMouseMove(event: MouseEvent) {
-      const rect = (gl.domElement as HTMLCanvasElement).getBoundingClientRect()
+      const rect = (gl.domElement).getBoundingClientRect()
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
     }
@@ -70,7 +70,7 @@ export function Interactions() {
         //hide tree contents when clicked on other objects
         //camera index 3
         if (currentCameraIndex === 3) {
-          toggleTreeContents(false, currentVisibleTreeContent as number)
+          toggleTreeContents(false, currentVisibleTreeContent!)
         }
       }
     }
@@ -108,7 +108,7 @@ export function Interactions() {
       if (currentCameraIndex === 3 && (hovered.name === 'leaves1' || hovered.name === 'leaves2' || hovered.name === 'leaves3' || hovered.name === 'leaves4' || hovered.name === 'TreeHoverContent')) {
         if (original) {
           const hoverMaterial = original.clone()
-          if ((hoverMaterial as any).color) (hoverMaterial as any).color.multiplyScalar(1.5)
+          if ((hoverMaterial).color) (hoverMaterial).color.multiplyScalar(1.5)
           hovered.material = hoverMaterial
         }
         gl.domElement.style.cursor = 'pointer'
@@ -121,12 +121,12 @@ export function Interactions() {
           if (!originalCameraPos.current) {
             originalCameraPos.current = camera.position.clone()
           }
-          let hoveredPos = new THREE.Vector3(
+          const hoveredPos = new THREE.Vector3(
             45.888423919677734,
             8.197944641113281,
             3.8714218139648438
           )
-          let distance = hoveredPos.distanceTo(camera.position)
+          const distance = hoveredPos.distanceTo(camera.position)
           if (distance > 24) {
             camera.position.lerp(hoveredPos, 0.02)
           }
@@ -139,7 +139,7 @@ export function Interactions() {
       if (currentCameraIndex === 0 && (hovered.name === 'BlueprintContent1' || hovered.name === 'BlueprintContent2' || hovered.name === 'BlueprintContent3' || hovered.name === 'BlueprintContent4' || hovered.name === 'BlueprintHoverContent')) {
         if (original) {
           const hoverMaterial = original.clone()
-          if ((hoverMaterial as any).color) (hoverMaterial as any).color.multiplyScalar(1.5)
+          if ((hoverMaterial).color) (hoverMaterial).color.multiplyScalar(1.5)
           hovered.material = hoverMaterial
         }
         // Store original scale and apply hover scale
@@ -155,8 +155,8 @@ export function Interactions() {
           if (!originalCameraPos.current) {
             originalCameraPos.current = camera.position.clone()
           }
-          let hoveredPos = new THREE.Vector3(14.9903564453125, 1.845353603363037, -19.42815399169922)
-          let distance = hoveredPos.distanceTo(camera.position)
+          const hoveredPos = new THREE.Vector3(14.9903564453125, 1.845353603363037, -19.42815399169922)
+          const distance = hoveredPos.distanceTo(camera.position)
           if (distance > 2.4) {
             camera.position.lerp(hoveredPos, 0.02)
           }

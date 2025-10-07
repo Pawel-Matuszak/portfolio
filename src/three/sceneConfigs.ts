@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-export type SceneConfig = {
+export interface SceneConfig {
   name: string
   sceneUrl: string
   textureUrl?: string
@@ -132,6 +132,21 @@ export const sceneConfigs: SceneConfig[] = [
   {
     name: 'treeContents-scene',
     sceneUrl: '/static/treeContents.glb',
+    position: { x: 0, y: 0, z: 0 },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: 1, y: 1, z: 1 },
+    textureSettings: {
+      flipY: false,
+      colorSpace: THREE.SRGBColorSpace,
+      minFilter: THREE.LinearMipmapLinearFilter,
+      magFilter: THREE.LinearFilter,
+      wrapS: THREE.RepeatWrapping,
+      wrapT: THREE.RepeatWrapping
+    }
+  },
+  {
+    name: 'island-hover',
+    sceneUrl: '/static/island-hover.glb',
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },

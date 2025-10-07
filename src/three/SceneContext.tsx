@@ -1,19 +1,25 @@
 import { createContext, useContext, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 
-export type LoadedScene = {
+export interface LoadedScene {
   name: string
   scene: THREE.Group
 }
 
-export type SceneContextValue = {
+export interface SceneContextValue {
   loadedScenes: LoadedScene[]
   setLoadedScenes: React.Dispatch<React.SetStateAction<LoadedScene[]>>
-  greenSceneMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
-  treeContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
-  workshopContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
-  contactContentMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
-  buildingsMeshes: React.MutableRefObject<THREE.Mesh<THREE.BufferGeometry, THREE.Material | THREE.Material[]>[]>
+  greenSceneMeshes: React.MutableRefObject<THREE.Mesh[]>
+  treeContentMeshes: React.MutableRefObject<THREE.Mesh[]>
+  workshopContentMeshes: React.MutableRefObject<THREE.Mesh[]>
+  contactContentMeshes: React.MutableRefObject<THREE.Mesh[]>
+  buildingsMeshes: React.MutableRefObject<THREE.Mesh[]>
+  islandWorkshopMeshes: React.MutableRefObject<THREE.Mesh[]>
+  islandTreeMeshes: React.MutableRefObject<THREE.Mesh[]>
+  islandContactMeshes: React.MutableRefObject<THREE.Mesh[]>
+  islandWorkshopOutline: React.MutableRefObject<THREE.Group | null>
+  islandTreeOutline: React.MutableRefObject<THREE.Group | null>
+  islandContactOutline: React.MutableRefObject<THREE.Group | null>
   treeContentsVisible: boolean
   setTreeContentsVisible: (v: boolean) => void
   currentVisibleTreeContent: number | null
@@ -42,6 +48,12 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
   const workshopContentMeshes = useRef<THREE.Mesh[]>([])
   const contactContentMeshes = useRef<THREE.Mesh[]>([])
   const buildingsMeshes = useRef<THREE.Mesh[]>([])
+  const islandWorkshopMeshes = useRef<THREE.Mesh[]>([])
+  const islandTreeMeshes = useRef<THREE.Mesh[]>([])
+  const islandContactMeshes = useRef<THREE.Mesh[]>([])
+  const islandWorkshopOutline = useRef<THREE.Group | null>(null)
+  const islandTreeOutline = useRef<THREE.Group | null>(null)
+  const islandContactOutline = useRef<THREE.Group | null>(null)
 
   const value: SceneContextValue = useMemo(() => ({
     loadedScenes,
@@ -51,6 +63,12 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     workshopContentMeshes,
     contactContentMeshes,
     buildingsMeshes,
+    islandWorkshopMeshes,
+    islandTreeMeshes,
+    islandContactMeshes,
+    islandWorkshopOutline,
+    islandTreeOutline,
+    islandContactOutline,
     treeContentsVisible,
     setTreeContentsVisible,
     currentVisibleTreeContent,
@@ -59,7 +77,18 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     setLoadedCameras,
     currentCameraIndex,
     setCurrentCameraIndex
-  }), [loadedScenes, treeContentsVisible, currentVisibleTreeContent, loadedCameras, currentCameraIndex, contactContentMeshes, buildingsMeshes])
+  }), [
+    loadedScenes,
+    treeContentsVisible,
+    currentVisibleTreeContent,
+    loadedCameras,
+    currentCameraIndex,
+    contactContentMeshes,
+    buildingsMeshes,
+    islandWorkshopMeshes,
+    islandTreeMeshes,
+    islandContactMeshes
+  ])
 
   return <SceneContext.Provider value={value}>{children}</SceneContext.Provider>
 }

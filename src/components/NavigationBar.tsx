@@ -4,7 +4,7 @@ import { Button } from './Button'
 interface NavigationBarProps {
   onBackClick: () => void
   onCameraClick: (index: number) => void
-  cameras: Array<{ name: string; index: number }>
+  cameras: { name: string; index: number }[]
   currentCameraIndex: number
   style?: React.CSSProperties
   className?: string
