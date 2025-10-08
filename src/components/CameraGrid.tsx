@@ -44,7 +44,7 @@ export function CameraGrid({
 
   return (
     <div className={className} style={gridStyles}>
-      {cameras.map(({ name, index }) => (
+      {cameras.map(({ /* name, */ index }) => (
         <div
           key={index}
           style={cellStyles}

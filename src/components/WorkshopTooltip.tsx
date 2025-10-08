@@ -15,24 +15,28 @@ const WORKSHOP_CONTENT: Record<string, WorkshopContent> = {
     BlueprintContent1: {
         title: 'Project 1',
         description: 'Coming soon - exciting project in development',
+        technologies: []
     },
     BlueprintContent2: {
         title: 'Pixel Art Editor',
         description: 'A web-based pixel art creation tool with many available tools',
+        technologies: ['TypeScript', 'React', 'Canvas API']
     },
     BlueprintContent3: {
         title: 'Telecom Website',
         description: 'Website for telecommunications company with modern design and responsive layout',
+        technologies: ['Next.js', 'Tailwind CSS', 'TypeScript']
     },
     BlueprintContent4: {
         title: 'Chess Game',
         description: 'Interactive chess game built with vanilla JavaScript',
+        technologies: ['JavaScript', 'HTML', 'CSS']
     }
 }
 
 export function WorkshopTooltip() {
     const {
-        workshopContentMeshes,
+        // workshopContentMeshes, // unused
         loadedScenes,
         currentCameraIndex,
         hoveredWorkshopContent

@@ -9,10 +9,10 @@ interface ButtonProps {
   className?: string
 }
 
-export function Button({ 
-  children, 
-  onClick, 
-  variant = 'primary', 
+export function Button({
+  children,
+  onClick,
+  variant = 'primary',
   size = 'medium',
   style = {},
   className = ''
@@ -30,7 +30,7 @@ export function Button({
     ...style
   }
 
-  const variantStyles: React.CSSProperties = {
+  const variantStyles: Record<'primary' | 'secondary', React.CSSProperties> = {
     primary: {
       backgroundColor: 'rgba(0, 0, 0, 0.1)',
       borderRadius: '8px',
