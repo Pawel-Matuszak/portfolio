@@ -17,6 +17,7 @@ export function Interactions() {
     setTreeContentsVisible,
     currentVisibleTreeContent,
     setCurrentVisibleTreeContent,
+    setHoveredWorkshopContent,
     currentCameraIndex
   } = useScene()
 
@@ -109,10 +110,28 @@ export function Interactions() {
       gl.domElement.removeEventListener('mousemove', onMouseMove)
       gl.domElement.removeEventListener('click', onClick)
     }
-  }, [gl, camera, mouse, raycaster, currentVisibleTreeContent, treeContentsVisible, greenSceneMeshes, treeContentMeshes, currentCameraIndex, workshopContentMeshes, contactContentMeshes, loadedCameras])
+  }, [
+    gl,
+    camera,
+    mouse,
+    raycaster,
+    currentVisibleTreeContent,
+    treeContentsVisible,
+    greenSceneMeshes,
+    treeContentMeshes,
+    currentCameraIndex,
+    workshopContentMeshes,
+    contactContentMeshes,
+    loadedCameras
+  ])
 
   useFrame(() => {
-    const allMeshes = [...greenSceneMeshes.current, ...treeContentMeshes.current, ...workshopContentMeshes.current, ...contactContentMeshes.current]
+    const allMeshes = [
+      ...greenSceneMeshes.current,
+      ...treeContentMeshes.current,
+      ...workshopContentMeshes.current,
+      ...contactContentMeshes.current
+    ]
     const camera = loadedCameras[currentCameraIndex]
     raycaster.setFromCamera(mouse, camera)
     const intersects = raycaster.intersectObjects(allMeshes)
@@ -124,6 +143,12 @@ export function Interactions() {
         hoverState.hovered.scale.copy(hoverState.originalScale)
       }
       gl.domElement.style.cursor = 'default'
+
+      // Clear workshop content tooltip if it was showing
+      if (hoverState.hovered.name.startsWith('BlueprintContent')) {
+        setHoveredWorkshopContent(null)
+      }
+
       hoverState.hovered = null
       hoverState.originalScale = null
       hoverEndTime.current = Date.now()
@@ -144,27 +169,33 @@ export function Interactions() {
 
         //zoom camera on hover
         //camera index 3
-        if (camera) {
-          // Cache original camera position once at hover start
-          if (!originalCameraPos.current) {
-            originalCameraPos.current = camera.position.clone()
-          }
-          const hoveredPos = new THREE.Vector3(
-            45.888423919677734,
-            8.197944641113281,
-            3.8714218139648438
-          )
-          const distance = hoveredPos.distanceTo(camera.position)
-          if (distance > 24) {
-            camera.position.lerp(hoveredPos, 0.02)
-          }
-        }
+        // if (camera) {
+        //   // Cache original camera position once at hover start
+        //   if (!originalCameraPos.current) {
+        //     originalCameraPos.current = camera.position.clone()
+        //   }
+        //   const hoveredPos = new THREE.Vector3(
+        //     45.888423919677734,
+        //     8.197944641113281,
+        //     3.8714218139648438
+        //   )
+        //   const distance = hoveredPos.distanceTo(camera.position)
+        //   if (distance > 24) {
+        //     camera.position.lerp(hoveredPos, 0.02)
+        //   }
+        // }
       }
 
 
       //hover effect on workshop content
       //camera index 0
-      if (currentCameraIndex === 0 && (hovered.name === 'BlueprintContent1' || hovered.name === 'BlueprintContent2' || hovered.name === 'BlueprintContent3' || hovered.name === 'BlueprintContent4' || hovered.name === 'BlueprintHoverContent')) {
+      if (currentCameraIndex === 0 && (
+        hovered.name === 'BlueprintContent1' ||
+        hovered.name === 'BlueprintContent2' ||
+        hovered.name === 'BlueprintContent3' ||
+        hovered.name === 'BlueprintContent4' ||
+        hovered.name === 'BlueprintHoverContent'
+      )) {
         if (original) {
           const hoverMaterial = original.clone()
           if ((hoverMaterial).color) (hoverMaterial).color.multiplyScalar(1.5)
@@ -173,22 +204,28 @@ export function Interactions() {
         // Store original scale and apply hover scale
         if (!hoverState.originalScale && hovered.name !== 'BlueprintHoverContent') {
           hoverState.originalScale = hovered.scale.clone()
-          hovered.scale.multiplyScalar(1.1)
+          hovered.scale.multiplyScalar(1.02)
         }
         gl.domElement.style.cursor = 'pointer'
         hoverState.hovered = hovered
-        //Zoom camera to hovered position
-        if (camera) {
-          // Cache original camera position once at hover start
-          if (!originalCameraPos.current) {
-            originalCameraPos.current = camera.position.clone()
-          }
-          const hoveredPos = new THREE.Vector3(14.9903564453125, 1.845353603363037, -19.42815399169922)
-          const distance = hoveredPos.distanceTo(camera.position)
-          if (distance > 2.4) {
-            camera.position.lerp(hoveredPos, 0.02)
-          }
+
+        // Set hovered workshop content for tooltip
+        if (hovered.name.startsWith('BlueprintContent')) {
+          setHoveredWorkshopContent(hovered.name)
         }
+
+        //Zoom camera to hovered position
+        // if (camera) {
+        //   // Cache original camera position once at hover start
+        //   if (!originalCameraPos.current) {
+        //     originalCameraPos.current = camera.position.clone()
+        //   }
+        //   const hoveredPos = new THREE.Vector3(14.9903564453125, 1.845353603363037, -19.42815399169922)
+        //   const distance = hoveredPos.distanceTo(camera.position)
+        //   if (distance > 2.4) {
+        //     camera.position.lerp(hoveredPos, 0.02)
+        //   }
+        // }
       }
 
       //hover effect on contact content

@@ -6,7 +6,7 @@ import { Interactions } from './Interactions'
 import { Cameras } from './Cameras'
 import { CameraSwitcher } from './CameraSwitcher'
 import { TreeContentOverlays } from '../components/TreeContentOverlays'
-import { Environment, OrbitControls } from '@react-three/drei'
+import { WorkshopTooltip } from '../components/WorkshopTooltip'
 
 export function CanvasScene() {
   return (
@@ -19,6 +19,7 @@ export function CanvasScene() {
           <Interactions />
           <Cameras />
           <TreeContentOverlays />
+          <WorkshopTooltip />
           {/* <OrbitControls enableDamping makeDefault /> */}
           {/* <Environment preset="park" background /> */}
           <color attach="background" args={['#87ceeb']} />

@@ -57,7 +57,6 @@ const DEFAULT_CONTENT: Record<number, TreeOverlayContent> = {
       SKILLS_LIST.get('Python') ?? '',
       SKILLS_LIST.get('TypeScript') ?? '',
       SKILLS_LIST.get('AI') ?? '',
-      SKILLS_LIST.get('REST API') ?? '',
     ]
   },
   3: {
@@ -65,9 +64,8 @@ const DEFAULT_CONTENT: Record<number, TreeOverlayContent> = {
     description: 'Enhanced application performance and load times. Fixed critical bugs and improved overall code stability',
     skills: [
       SKILLS_LIST.get('Next.js') ?? '',
-      SKILLS_LIST.get('REST API') ?? '',
-      SKILLS_LIST.get('Python') ?? '',
-      SKILLS_LIST.get('AI') ?? '',
+      SKILLS_LIST.get('TypeScript') ?? '',
+      SKILLS_LIST.get('React') ?? '',
     ]
   },
   2: {
@@ -77,7 +75,6 @@ const DEFAULT_CONTENT: Record<number, TreeOverlayContent> = {
       SKILLS_LIST.get('Python') ?? '',
       SKILLS_LIST.get('AI') ?? '',
       SKILLS_LIST.get('REST API') ?? '',
-      SKILLS_LIST.get('Next.js') ?? '',
     ]
   },
   1: {
@@ -86,8 +83,6 @@ const DEFAULT_CONTENT: Record<number, TreeOverlayContent> = {
     skills: [
       SKILLS_LIST.get('React') ?? '',
       SKILLS_LIST.get('REST API') ?? '',
-      SKILLS_LIST.get('AI') ?? '',
-      SKILLS_LIST.get('Python') ?? '',
     ]
   }
 }

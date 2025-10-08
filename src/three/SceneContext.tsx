@@ -25,6 +25,8 @@ export interface SceneContextValue {
   setTreeContentsVisible: (v: boolean) => void
   currentVisibleTreeContent: number | null
   setCurrentVisibleTreeContent: (v: number | null) => void
+  hoveredWorkshopContent: string | null
+  setHoveredWorkshopContent: (v: string | null) => void
   loadedCameras: THREE.PerspectiveCamera[]
   setLoadedCameras: React.Dispatch<React.SetStateAction<THREE.PerspectiveCamera[]>>
   currentCameraIndex: number
@@ -43,6 +45,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
   const [currentCameraIndex, setCurrentCameraIndex] = useState(1)
   const [treeContentsVisible, setTreeContentsVisible] = useState(false)
   const [currentVisibleTreeContent, setCurrentVisibleTreeContent] = useState<number | null>(null)
+  const [hoveredWorkshopContent, setHoveredWorkshopContent] = useState<string | null>(null)
 
   const greenSceneMeshes = useRef<THREE.Mesh[]>([])
   const treeContentMeshes = useRef<THREE.Mesh[]>([])
@@ -76,6 +79,8 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     setTreeContentsVisible,
     currentVisibleTreeContent,
     setCurrentVisibleTreeContent,
+    hoveredWorkshopContent,
+    setHoveredWorkshopContent,
     loadedCameras,
     setLoadedCameras,
     currentCameraIndex,
@@ -84,6 +89,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     loadedScenes,
     treeContentsVisible,
     currentVisibleTreeContent,
+    hoveredWorkshopContent,
     loadedCameras,
     currentCameraIndex,
     contactContentMeshes,

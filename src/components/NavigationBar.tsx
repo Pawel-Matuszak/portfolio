@@ -35,19 +35,27 @@ export function NavigationBar({
 
   return (
     <div className={className} style={navStyles}>
-      <Button onClick={onBackClick} size="large">
+      <Button onClick={onBackClick} size="large" variant="secondary">
         Back
       </Button>
-      {availableCameras.map(({ name, index }) => (
-        <Button
-          key={index}
-          onClick={() => onCameraClick(index)}
-          size="large"
-          variant="secondary"
-        >
-          {name}
-        </Button>
-      ))}
-    </div>
+      <Button
+        key={availableCameras[0].index}
+        onClick={() => onCameraClick(availableCameras[0].index)}
+        size="large"
+        variant="secondary"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
+      >
+        {availableCameras[0].name}
+      </Button>
+      <Button
+        key={availableCameras[availableCameras.length - 1].index}
+        onClick={() => onCameraClick(availableCameras[availableCameras.length - 1].index)}
+        size="large"
+        variant="secondary"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
+      >
+        {availableCameras[availableCameras.length - 1].name}
+      </Button>
+    </div >
   )
 }
