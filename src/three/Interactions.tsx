@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useCallback } from 'react'
 import * as THREE from 'three'
 import { useThree, useFrame } from '@react-three/fiber'
 import { useScene } from './SceneContext'
@@ -23,6 +23,7 @@ export function Interactions() {
 
   const raycaster = useMemo(() => new THREE.Raycaster(), [])
   const mouse = useMemo(() => new THREE.Vector2(), [])
+  const lastMousePosition = useRef(new THREE.Vector2())
   const hoverState = useMemo(() => ({
     hovered: null as THREE.Mesh | null,
     originalScale: null as THREE.Vector3 | null
@@ -30,6 +31,44 @@ export function Interactions() {
 
   const originalCameraPos = useRef<THREE.Vector3 | null>(null)
   const hoverEndTime = useRef<number | null>(null)
+
+  // Performance optimization refs
+  const raycasterThrottle = useRef(0)
+  const RAYCASTER_THROTTLE_MS = 16 // ~60fps
+  const MOUSE_MOVEMENT_THRESHOLD = 0.001
+
+  // Pre-create hover materials to avoid cloning on every hover
+  const hoverMaterials = useMemo(() => {
+    const materials = new Map<THREE.Mesh, THREE.Material>()
+    const allMeshes = [
+      ...greenSceneMeshes.current,
+      ...treeContentMeshes.current,
+      ...workshopContentMeshes.current,
+      ...contactContentMeshes.current
+    ]
+
+    allMeshes.forEach(mesh => {
+      const original = (mesh.userData as any).originalMaterial
+      if (original) {
+        const hoverMaterial = original.clone()
+        if ((hoverMaterial).color) {
+          (hoverMaterial).color.multiplyScalar(1.5)
+        }
+        materials.set(mesh, hoverMaterial)
+      }
+    })
+    return materials
+  }, [greenSceneMeshes, treeContentMeshes, workshopContentMeshes, contactContentMeshes])
+
+  // Frustum culling for performance
+  const frustum = useMemo(() => new THREE.Frustum(), [])
+  const matrix = useMemo(() => new THREE.Matrix4(), [])
+
+  // Batch state updates to reduce re-renders
+  const updateHoverState = useCallback((hovered: THREE.Mesh | null, originalScale: THREE.Vector3 | null) => {
+    hoverState.hovered = hovered
+    hoverState.originalScale = originalScale
+  }, [hoverState])
 
   // Reset original camera position and hide tree contents when switching cameras
   useEffect(() => {
@@ -126,6 +165,17 @@ export function Interactions() {
   ])
 
   useFrame(() => {
+    const now = performance.now()
+
+    // Throttle raycasting to improve performance
+    if (now - raycasterThrottle.current < RAYCASTER_THROTTLE_MS) return
+
+    // Only raycast if mouse has moved significantly
+    if (mouse.distanceTo(lastMousePosition.current) < MOUSE_MOVEMENT_THRESHOLD) return
+
+    raycasterThrottle.current = now
+    lastMousePosition.current.copy(mouse)
+
     const allMeshes = [
       ...greenSceneMeshes.current,
       ...treeContentMeshes.current,
@@ -133,8 +183,16 @@ export function Interactions() {
       ...contactContentMeshes.current
     ]
     const camera = loadedCameras[currentCameraIndex]
+
+    // Frustum culling - only raycast against visible objects
+    camera.updateMatrixWorld()
+    matrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    frustum.setFromProjectionMatrix(matrix)
+
+    const visibleMeshes = allMeshes.filter(mesh => frustum.intersectsObject(mesh))
+
     raycaster.setFromCamera(mouse, camera)
-    const intersects = raycaster.intersectObjects(allMeshes)
+    const intersects = raycaster.intersectObjects(visibleMeshes)
     if (hoverState.hovered) {
       const original = (hoverState.hovered.userData as any).originalMaterial
       if (original) hoverState.hovered.material = original
@@ -149,23 +207,20 @@ export function Interactions() {
         setHoveredWorkshopContent(null)
       }
 
-      hoverState.hovered = null
-      hoverState.originalScale = null
+      updateHoverState(null, null)
       hoverEndTime.current = Date.now()
     }
     if (intersects.length > 0) {
       const hovered = intersects[0].object as THREE.Mesh
-      const original = (hovered.userData as any).originalMaterial
       //hover effect on leaves
       //camera index 3
       if (currentCameraIndex === 3 && (hovered.name === 'leaves1' || hovered.name === 'leaves2' || hovered.name === 'leaves3' || hovered.name === 'leaves4' || hovered.name === 'TreeHoverContent')) {
-        if (original) {
-          const hoverMaterial = original.clone()
-          if ((hoverMaterial).color) (hoverMaterial).color.multiplyScalar(1.5)
+        const hoverMaterial = hoverMaterials.get(hovered)
+        if (hoverMaterial) {
           hovered.material = hoverMaterial
         }
         gl.domElement.style.cursor = 'pointer'
-        hoverState.hovered = hovered
+        updateHoverState(hovered, null)
 
         //zoom camera on hover
         //camera index 3
@@ -196,18 +251,18 @@ export function Interactions() {
         hovered.name === 'BlueprintContent4' ||
         hovered.name === 'BlueprintHoverContent'
       )) {
-        if (original) {
-          const hoverMaterial = original.clone()
-          if ((hoverMaterial).color) (hoverMaterial).color.multiplyScalar(1.5)
+        const hoverMaterial = hoverMaterials.get(hovered)
+        if (hoverMaterial) {
           hovered.material = hoverMaterial
         }
         // Store original scale and apply hover scale
-        if (!hoverState.originalScale && hovered.name !== 'BlueprintHoverContent') {
-          hoverState.originalScale = hovered.scale.clone()
+        let originalScale = null
+        if (hovered.name !== 'BlueprintHoverContent') {
+          originalScale = hovered.scale.clone()
           hovered.scale.multiplyScalar(1.02)
         }
         gl.domElement.style.cursor = 'pointer'
-        hoverState.hovered = hovered
+        updateHoverState(hovered, originalScale)
 
         // Set hovered workshop content for tooltip
         if (hovered.name.startsWith('BlueprintContent')) {
@@ -231,12 +286,10 @@ export function Interactions() {
       //hover effect on contact content
       //camera index 2
       if (currentCameraIndex === 2 && (hovered.name === 'ContactContent1' || hovered.name === 'ContactContent2' || hovered.name === 'ContactContent3' || hovered.name === 'ContactContent4')) {
-        if (!hoverState.originalScale) {
-          hoverState.originalScale = hovered.scale.clone()
-          hovered.scale.multiplyScalar(1.1)
-        }
+        const originalScale = hovered.scale.clone()
+        hovered.scale.multiplyScalar(1.1)
         gl.domElement.style.cursor = 'pointer'
-        hoverState.hovered = hovered
+        updateHoverState(hovered, originalScale)
       }
     }
 

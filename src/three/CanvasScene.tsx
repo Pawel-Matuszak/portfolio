@@ -1,4 +1,5 @@
 import { Canvas } from '@react-three/fiber'
+import { Perf } from 'r3f-perf'
 import { SceneProvider } from './SceneContext'
 import { ModelLoader } from './ModelLoader'
 import { World } from './World'
@@ -21,6 +22,17 @@ export function CanvasScene() {
           <Cameras />
           <TreeContentOverlays />
           <WorkshopTooltip />
+          {import.meta.env.DEV && (
+            <>
+              <Perf
+                position="top-left"
+                minimal={false}
+                showGraph={true}
+                logsPerSecond={2}
+                deepAnalyze={false}
+              />
+            </>
+          )}
           {/* <OrbitControls enableDamping makeDefault /> */}
           {/* <Environment preset="park" background /> */}
           <color attach="background" args={['#87ceeb']} />

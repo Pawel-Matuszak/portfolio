@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from 'react'
+import { Fragment, useMemo, useState, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -47,42 +47,58 @@ export function WorkshopTooltip() {
         [loadedScenes]
     )
 
-    const positions = useMemo(() => new Map<string, THREE.Vector3>(), [])
-    const quaternions = useMemo(() => new Map<string, THREE.Quaternion>(), [])
+    // Only track position and quaternion for the currently hovered object
+    const [currentPos, setCurrentPos] = useState<THREE.Vector3 | null>(null)
+    const [currentQuat, setCurrentQuat] = useState<THREE.Quaternion | null>(null)
     const target = useMemo(() => new THREE.Vector3(), [])
     const quat = useMemo(() => new THREE.Quaternion(), [])
     const offsetDir = useMemo(() => new THREE.Vector3(0, 1, 0), [])
 
-    useFrame(() => {
-        if (!workshopScene) return
+    // Performance optimization - throttle position updates
+    const positionUpdateThrottle = useRef(0)
+    const POSITION_UPDATE_MS = 33 // ~30fps
 
-        // Update positions for all workshop content objects
-        Object.keys(WORKSHOP_CONTENT).forEach(objectName => {
-            const obj = workshopScene.getObjectByName(objectName)
-            if (obj) {
-                obj.getWorldPosition(target)
-                positions.set(objectName, target.clone())
-                obj.getWorldQuaternion(quat)
-                quaternions.set(objectName, quat.clone())
-            }
-        })
+    useFrame(() => {
+        if (!workshopScene || !hoveredWorkshopContent) return
+
+        const now = performance.now()
+        if (now - positionUpdateThrottle.current < POSITION_UPDATE_MS) return
+        positionUpdateThrottle.current = now
+
+        // Only update position for the currently hovered object
+        const obj = workshopScene.getObjectByName(hoveredWorkshopContent)
+        if (obj) {
+            obj.getWorldPosition(target)
+            setCurrentPos(target.clone())
+            obj.getWorldQuaternion(quat)
+            setCurrentQuat(quat.clone())
+        }
     })
 
+    // Clear position/quaternion when hovered object changes
+    useEffect(() => {
+        if (!hoveredWorkshopContent) {
+            setCurrentPos(null)
+            setCurrentQuat(null)
+        }
+    }, [hoveredWorkshopContent])
+
     // Only show tooltip when in workshop camera (index 0) and hovering over content
-    if (currentCameraIndex !== 0 || !hoveredWorkshopContent || !workshopScene) return null
+    if (currentCameraIndex !== 0 || !hoveredWorkshopContent || !workshopScene ||
+        !currentPos || !currentQuat) return null
 
-    const pos = positions.get(hoveredWorkshopContent)
-    const q = quaternions.get(hoveredWorkshopContent)
     const content = WORKSHOP_CONTENT[hoveredWorkshopContent]
-
-    if (!pos || !q || !content) return null
+    if (!content) return null
 
     // Offset slightly above the object
-    const anchoredPos = pos.clone().addScaledVector(offsetDir, 0.2)
+    const anchoredPos = currentPos.clone().addScaledVector(offsetDir, 0.2)
 
     return (
         <Fragment>
-            <group position={[anchoredPos.x, anchoredPos.y, anchoredPos.z]} quaternion={q}>
+            <group
+                position={[anchoredPos.x, anchoredPos.y, anchoredPos.z]}
+                quaternion={currentQuat}
+            >
                 <group rotation={[-Math.PI / 2, 0, 0]}>
                     <Html
                         transform

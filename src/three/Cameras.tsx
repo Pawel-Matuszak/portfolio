@@ -82,8 +82,15 @@ export function Cameras() {
   //camera parallax tilt effect
   const mouseX = useRef(0)
   const mouseY = useRef(0)
+  const lastMouseUpdate = useRef(0)
+  const MOUSE_UPDATE_THROTTLE = 16 // ~60fps
+
   useEffect(() => {
     function onMouseMove(e: MouseEvent) {
+      const now = performance.now()
+      if (now - lastMouseUpdate.current < MOUSE_UPDATE_THROTTLE) return
+
+      lastMouseUpdate.current = now
       const selected = loadedCameras[currentCameraIndex]
       if (selected) {
         mouseX.current = e.clientX / window.innerWidth - 0.5
@@ -106,7 +113,14 @@ export function Cameras() {
     }
   }, [loadedCameras])
 
+  const cameraUpdateThrottle = useRef(0)
+  const CAMERA_UPDATE_MS = 16 // ~60fps
+
   useFrame(() => {
+    const now = performance.now()
+    if (now - cameraUpdateThrottle.current < CAMERA_UPDATE_MS) return
+    cameraUpdateThrottle.current = now
+
     const selected = loadedCameras[currentCameraIndex]
     if (selected) {
       const baseQuat = baseQuaternionsRef.current.get(selected)

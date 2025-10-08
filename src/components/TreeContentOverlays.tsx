@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo } from 'react'
+import { Fragment, useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -102,6 +102,10 @@ export function TreeContentOverlays({
   const quat = useMemo(() => new THREE.Quaternion(), [])
   const forward = useMemo(() => new THREE.Vector3(0, 0, 1), [])
 
+  // Performance optimization - throttle position updates
+  const positionUpdateThrottle = useRef(0)
+  const POSITION_UPDATE_MS = 33 // ~30fps
+
   // Get fixed positions for skills
   const skillPositions = useMemo(() => {
     if (currentVisibleTreeContent && SKILL_POSITIONS[currentVisibleTreeContent]) {
@@ -126,6 +130,11 @@ export function TreeContentOverlays({
 
   useFrame(() => {
     if (!treeScene) return
+
+    const now = performance.now()
+    if (now - positionUpdateThrottle.current < POSITION_UPDATE_MS) return
+    positionUpdateThrottle.current = now
+
     for (let i = 1; i <= 4; i++) {
       const obj = treeScene.getObjectByName(`TreeContent${i}`)
       if (obj) {
