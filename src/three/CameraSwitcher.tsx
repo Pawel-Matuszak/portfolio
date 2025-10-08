@@ -39,7 +39,6 @@ export function CameraSwitcher() {
           onCameraSelect={setCurrentCameraIndex}
           onHoverStart={(index) => {
             // Map camera index to outline group visibility
-            console.log('Hover start, index:', index)
             if (index === 0 && islandWorkshopOutline.current) {
               islandWorkshopOutline.current.visible = true
               // Make individual meshes visible
@@ -48,7 +47,6 @@ export function CameraSwitcher() {
                   child.visible = true
                 }
               })
-              console.log('Showing workshop outline')
             }
             if (index === 3 && islandTreeOutline.current) {
               islandTreeOutline.current.visible = true
@@ -58,7 +56,6 @@ export function CameraSwitcher() {
                   child.visible = true
                 }
               })
-              console.log('Showing tree outline')
             }
             if (index === 2 && islandContactOutline.current) {
               islandContactOutline.current.visible = true
@@ -68,11 +65,9 @@ export function CameraSwitcher() {
                   child.visible = true
                 }
               })
-              console.log('Showing contact outline')
             }
           }}
           onHoverEnd={() => {
-            console.log('Hover end - hiding all outlines')
             if (islandWorkshopOutline.current) {
               islandWorkshopOutline.current.visible = false
               // Make individual meshes invisible

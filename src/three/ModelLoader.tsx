@@ -216,7 +216,6 @@ export function ModelLoader() {
           }
           islandWorkshopOutline.current = workshopGroup
           outlinesGroup.add(workshopGroup)
-          console.log('Created workshop outline group with', workshopGroup.children.length, 'meshes')
         }
 
         if (islandTreeMeshes.current.length > 0) {
@@ -232,7 +231,6 @@ export function ModelLoader() {
           }
           islandTreeOutline.current = treeGroup
           outlinesGroup.add(treeGroup)
-          console.log('Created tree outline group with', treeGroup.children.length, 'meshes')
         }
 
         if (islandContactMeshes.current.length > 0) {
@@ -248,14 +246,12 @@ export function ModelLoader() {
           }
           islandContactOutline.current = contactGroup
           outlinesGroup.add(contactGroup)
-          console.log('Created contact outline group with', contactGroup.children.length, 'meshes')
         }
 
         if (outlinesGroup.children.length > 0) {
           results.push({ name: 'island-outlines', scene: outlinesGroup })
-          console.log('Added island-outlines scene with', outlinesGroup.children.length, 'groups')
         } else {
-          console.log('No outline groups created')
+          console.error('No outline groups created')
         }
       } catch (err) {
         console.error('Failed to create island outlines', err)
