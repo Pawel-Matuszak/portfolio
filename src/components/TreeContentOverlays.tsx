@@ -10,15 +10,15 @@ interface TreeOverlayContent {
   imageUrl?: string
   skills: string[]
 }
-
+const BASE_URL = import.meta.env.BASE_URL
 const SKILLS_LIST = new Map<string, string>(
   [
-    ['Python', '/static/icons/python.png'],
-    ['TypeScript', '/static/icons/typescript.png'],
-    ['React', '/static/icons/react.png'],
-    ['AI', '/static/icons/science.png'],
-    ['REST API', '/static/icons/api.png'],
-    ['Next.js', '/static/icons/nextjs.png'],
+    ['Python', `${BASE_URL}static/icons/python.png`],
+    ['TypeScript', `${BASE_URL}static/icons/typescript.png`],
+    ['React', `${BASE_URL}static/icons/react.png`],
+    ['AI', `${BASE_URL}static/icons/science.png`],
+    ['REST API', `${BASE_URL}static/icons/api.png`],
+    ['Next.js', `${BASE_URL}static/icons/nextjs.png`],
   ]
 )
 
