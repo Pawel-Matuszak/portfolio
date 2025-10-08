@@ -27,6 +27,7 @@ export function ModelLoader() {
   } = useScene()
 
   // GLTFs are loaded per-scene below with DRACO configured on each loader instance
+  const BASE_URL = import.meta.env.BASE_URL
 
   // Texture loader is synchronous in R3F via THREE.TextureLoader
   useEffect(() => {
@@ -83,7 +84,7 @@ export function ModelLoader() {
               if (config.sceneUrl.endsWith('blueprintContents.glb')) {
                 if (['BlueprintContent1', 'BlueprintContent2', 'BlueprintContent3', 'BlueprintContent4', 'BlueprintHoverContent'].includes(mesh.name)) {
                   workshopContentMeshes.current.push(mesh);
-                  const tex = textureLoader.load(`/static/${mesh.name}.png`)
+                  const tex = textureLoader.load(`${BASE_URL}static/${mesh.name}.png`)
                   Object.assign(tex, config.textureSettings)
                   mesh.material = new THREE.MeshBasicMaterial({ map: tex });
                   if (mesh.material?.clone) {
@@ -95,7 +96,7 @@ export function ModelLoader() {
               if (config.sceneUrl.endsWith('contactContents.glb')) {
                 if (['ContactContent1', 'ContactContent2', 'ContactContent3', 'ContactContent4'].includes(mesh.name)) {
                   contactContentMeshes.current.push(mesh);
-                  const tex = textureLoader.load(`/static/${mesh.name}.png`)
+                  const tex = textureLoader.load(`${BASE_URL}static/${mesh.name}.png`)
                   Object.assign(tex, config.textureSettings)
                   mesh.material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
                   if (mesh.material?.clone) {

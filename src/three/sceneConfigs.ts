@@ -17,12 +17,14 @@ export interface SceneConfig {
   }>
 }
 
+const BASE_URL = import.meta.env.BASE_URL
+
 // Assets are expected under public/static/
 export const sceneConfigs: SceneConfig[] = [
   {
     name: 'islands-scene',
-    sceneUrl: '/static/islands.glb',
-    textureUrl: '/static/islands.png',
+    sceneUrl: `${BASE_URL}static/islands.glb`,
+    textureUrl: `${BASE_URL}static/islands.png`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -37,8 +39,8 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'buildings-scene',
-    sceneUrl: '/static/buildings.glb',
-    textureUrl: '/static/buildings.png',
+    sceneUrl: `${BASE_URL}static/buildings.glb`,
+    textureUrl: `${BASE_URL}static/buildings.png`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -53,8 +55,8 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'bushRocks-scene',
-    sceneUrl: '/static/green.glb',
-    textureUrl: '/static/green.png',
+    sceneUrl: `${BASE_URL}static/green.glb`,
+    textureUrl: `${BASE_URL}static/green.png`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -69,8 +71,8 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'small-scene',
-    sceneUrl: '/static/small.glb',
-    textureUrl: '/static/small.png',
+    sceneUrl: `${BASE_URL}static/small.glb`,
+    textureUrl: `${BASE_URL}static/small.png`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -85,8 +87,8 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'water-scene',
-    sceneUrl: '/static/water.glb',
-    textureUrl: '/static/water.png',
+      sceneUrl: `${BASE_URL}static/water.glb`,
+    textureUrl: `${BASE_URL}static/water.png`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -101,7 +103,7 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'contactContents-scene',
-    sceneUrl: '/static/contactContents.glb',
+    sceneUrl: `${BASE_URL}static/contactContents.glb`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -116,7 +118,7 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'blueprintContents-scene',
-    sceneUrl: '/static/blueprintContents.glb',
+    sceneUrl: `${BASE_URL}static/blueprintContents.glb`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -131,7 +133,7 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'treeContents-scene',
-    sceneUrl: '/static/treeContents.glb',
+    sceneUrl: `${BASE_URL}static/treeContents.glb`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -146,7 +148,7 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'island-hover',
-    sceneUrl: '/static/island-hover.glb',
+    sceneUrl: `${BASE_URL}static/island-hover.glb`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -161,8 +163,8 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'nav-island',
-    sceneUrl: '/static/navIsland.glb',
-    textureUrl: '/static/navIsland.png',
+    sceneUrl: `${BASE_URL}static/navIsland.glb`,
+    textureUrl: `${BASE_URL}static/navIsland.png`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -177,8 +179,8 @@ export const sceneConfigs: SceneConfig[] = [
   }
 ]
 
-export const CAMERAS_GLTF_URL = '/static/cameras.glb'
-export const DRACO_DECODER_PATH = '/static/draco/'
+export const CAMERAS_GLTF_URL = `${BASE_URL}static/cameras.glb`
+export const DRACO_DECODER_PATH = `${BASE_URL}static/draco/`
 export const CONTACT_LINKS = {
   ContactContent1: 'https://github.com/Pawel-Matuszak',
   ContactContent2: 'https://www.linkedin.com/in/pawe%C5%82-matuszak-404a5523b/',
