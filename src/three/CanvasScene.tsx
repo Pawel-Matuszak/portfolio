@@ -7,6 +7,7 @@ import { Cameras } from './Cameras'
 import { CameraSwitcher } from './CameraSwitcher'
 import { TreeContentOverlays } from '../components/TreeContentOverlays'
 import { WorkshopTooltip } from '../components/WorkshopTooltip'
+import { LoadingScreen } from '../components/LoadingScreen'
 
 export function CanvasScene() {
   return (
@@ -24,6 +25,7 @@ export function CanvasScene() {
           {/* <Environment preset="park" background /> */}
           <color attach="background" args={['#87ceeb']} />
         </Canvas>
+        <LoadingScreen />
         <CameraSwitcher />
       </SceneProvider>
     </div>

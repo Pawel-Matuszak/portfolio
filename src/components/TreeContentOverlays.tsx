@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from 'react'
+import { Fragment, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -110,6 +110,20 @@ export function TreeContentOverlays({
     return []
   }, [currentVisibleTreeContent])
 
+  // Preload all skill images to avoid flashing when switching indices
+  useEffect(() => {
+    const urls = new Set<string>()
+    Object.values(contents).forEach((c) => {
+      c.skills.forEach((u) => {
+        if (u && !urls.has(u)) {
+          urls.add(u)
+          const img = new Image()
+          img.src = u
+        }
+      })
+    })
+  }, [contents])
+
   useFrame(() => {
     if (!treeScene) return
     for (let i = 1; i <= 4; i++) {
@@ -138,9 +152,10 @@ export function TreeContentOverlays({
 
   return (
     <Fragment>
-      <group position={[anchoredPos.x, anchoredPos.y, anchoredPos.z]} quaternion={q}>
+      <group key={`tree-overlay-${index}`} position={[anchoredPos.x, anchoredPos.y, anchoredPos.z]} quaternion={q}>
         <group rotation={[Math.PI / 2, -Math.PI, -Math.PI / 2]}>
           <Html
+            key={`tree-html-${index}`}
             transform
             position={[0, 0, 0]}
             distanceFactor={6}
@@ -224,7 +239,7 @@ export function TreeContentOverlays({
 
                 return (
                   <div
-                    key={index}
+                    key={`skill-${index}-${skillUrl}`}
                     style={{
                       position: 'absolute',
                       left: `${skillPos.x + 160 - 41}px`, // Center the image

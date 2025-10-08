@@ -66,3 +66,18 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Loading overlay styles */
+.loading-overlay { position: fixed; inset: 0; display: grid; place-items: center; z-index: 9999; background: linear-gradient(180deg, #244060 0%, #2b648f 60%, #244060 100%); }
+.loading-title { font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: #e6f2ff; opacity: 0.95; margin-bottom: 8px; text-align: center; }
+.loading-subtitle { font-size: 14px; color: #cfe6ff; text-align: center; opacity: 0.9; }
+
+/* Ocean + boat */
+.ocean { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px }
+.boat {  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35)); }
+
+@keyframes swell {
+  0% { transform: translateX(0) translateY(0) rotate(0.001deg); }
+  50% { transform: translateX(3%) translateY(-8px) rotate(0.001deg); }
+  100% { transform: translateX(0) translateY(0) rotate(0.001deg); }
+}
