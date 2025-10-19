@@ -24,6 +24,7 @@ export function ModelLoader() {
     islandTreeOutline,
     islandContactOutline,
     navContentMeshes,
+    contactAnimationMeshes,
   } = useScene()
 
   // GLTFs are loaded per-scene below with DRACO configured on each loader instance
@@ -65,7 +66,12 @@ export function ModelLoader() {
               const mesh = child as THREE.Mesh
               mesh.material = material
 
-              if (config.sceneUrl.endsWith('green.glb')) {
+              if (config.sceneUrl.endsWith('small.glb')) {
+                if (mesh.name.includes('ContactMeText')) {
+                  contactAnimationMeshes.current.push(mesh)
+                }
+              }
+              if (config.sceneUrl.endsWith('nature.glb')) {
                 if (['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(mesh.name)) {
                   greenSceneMeshes.current.push(mesh)
                     ; (mesh.userData as Record<string, unknown>).originalMaterial = (material).clone()
@@ -113,7 +119,7 @@ export function ModelLoader() {
                 }
               }
               //Group island meshes
-              if (config.sceneUrl.endsWith('island-hover.glb')) {
+              if (config.sceneUrl.endsWith('islandHover.glb')) {
                 if (['Workshop'].includes(mesh.name)) {
                   islandWorkshopMeshes.current.push(mesh);
                 }
@@ -150,6 +156,15 @@ export function ModelLoader() {
             gltf.visible = true
             gltf.traverse((child: THREE.Object3D) => {
               if (child instanceof THREE.Mesh && ['Workshop', 'Tree', 'Lighthouse'].includes(child.name)) {
+                child.visible = false
+              }
+            })
+          }
+          //hide contact animation by default
+          if (config.name === 'small-scene') {
+            gltf.visible = true
+            gltf.traverse((child: THREE.Object3D) => {
+              if (child instanceof THREE.Mesh && child.name.includes('ContactMeText')) {
                 child.visible = false
               }
             })
@@ -276,6 +291,7 @@ export function ModelLoader() {
     islandTreeOutline,
     islandContactOutline,
     navContentMeshes,
+    contactAnimationMeshes,
   ])
 
   return null

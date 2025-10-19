@@ -55,8 +55,8 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'bushRocks-scene',
-    sceneUrl: `${BASE_URL}static/green.glb`,
-    textureUrl: `${BASE_URL}static/green.png`,
+    sceneUrl: `${BASE_URL}static/nature.glb`,
+    textureUrl: `${BASE_URL}static/nature.png`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
@@ -148,23 +148,7 @@ export const sceneConfigs: SceneConfig[] = [
   },
   {
     name: 'island-hover',
-    sceneUrl: `${BASE_URL}static/island-hover.glb`,
-    position: { x: 0, y: 0, z: 0 },
-    rotation: { x: 0, y: 0, z: 0 },
-    scale: { x: 1, y: 1, z: 1 },
-    textureSettings: {
-      flipY: false,
-      colorSpace: THREE.SRGBColorSpace,
-      minFilter: THREE.LinearMipmapLinearFilter,
-      magFilter: THREE.LinearFilter,
-      wrapS: THREE.RepeatWrapping,
-      wrapT: THREE.RepeatWrapping
-    }
-  },
-  {
-    name: 'nav-island',
-    sceneUrl: `${BASE_URL}static/navIsland.glb`,
-    textureUrl: `${BASE_URL}static/navIsland.png`,
+    sceneUrl: `${BASE_URL}static/islandHover.glb`,
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },

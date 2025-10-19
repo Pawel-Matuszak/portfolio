@@ -21,6 +21,7 @@ export interface SceneContextValue {
   islandTreeOutline: React.MutableRefObject<THREE.Group | null>
   islandContactOutline: React.MutableRefObject<THREE.Group | null>
   navContentMeshes: React.MutableRefObject<THREE.Mesh[]>
+  contactAnimationMeshes: React.MutableRefObject<THREE.Mesh[]>
   treeContentsVisible: boolean
   setTreeContentsVisible: (v: boolean) => void
   currentVisibleTreeContent: number | null
@@ -43,6 +44,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
   //2 - about
   //3 - three
   const [currentCameraIndex, setCurrentCameraIndex] = useState(1)
+  const contactAnimationMeshes = useRef<THREE.Mesh[]>([])
   const [treeContentsVisible, setTreeContentsVisible] = useState(false)
   const [currentVisibleTreeContent, setCurrentVisibleTreeContent] = useState<number | null>(null)
   const [hoveredWorkshopContent, setHoveredWorkshopContent] = useState<string | null>(null)
@@ -75,6 +77,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     islandTreeOutline,
     islandContactOutline,
     navContentMeshes,
+    contactAnimationMeshes,
     treeContentsVisible,
     setTreeContentsVisible,
     currentVisibleTreeContent,
@@ -87,6 +90,7 @@ export function SceneProvider({ children }: { children: React.ReactNode }) {
     setCurrentCameraIndex
   }), [
     loadedScenes,
+    contactAnimationMeshes,
     treeContentsVisible,
     currentVisibleTreeContent,
     hoveredWorkshopContent,

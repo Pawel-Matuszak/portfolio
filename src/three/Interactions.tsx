@@ -11,6 +11,7 @@ export function Interactions() {
     treeContentMeshes,
     workshopContentMeshes,
     contactContentMeshes,
+    contactAnimationMeshes,
     loadedScenes,
     loadedCameras,
     treeContentsVisible,
@@ -32,7 +33,7 @@ export function Interactions() {
 
   const originalCameraPos = useRef<THREE.Vector3 | null>(null)
   const hoverEndTime = useRef<number | null>(null)
-
+  const contactFirstTimeFlash = useRef(true)
   // Performance optimization refs
   const raycasterThrottle = useRef(0)
   const RAYCASTER_THROTTLE_MS = 16 // ~60fps
@@ -75,10 +76,9 @@ export function Interactions() {
   useEffect(() => {
     originalCameraPos.current = null
     toggleTreeContents(false, currentVisibleTreeContent!)
-    if (currentCameraIndex === 3) {
-      if (!threeFirstTImeFlash.current) {
-        return
-      }
+
+    //flash animation for leaves to suggest interactivity on three page
+    if (currentCameraIndex === 3 && threeFirstTImeFlash.current) {
       // Simple flash animation for leaves to suggest interactivity
       const treeContentsScene = loadedScenes.find((s) => s.name === 'bushRocks-scene')
       if (!treeContentsScene) {
@@ -148,6 +148,28 @@ export function Interactions() {
       }
       threeFirstTImeFlash.current = false
     }
+
+    //contact me text animation on contact page
+    if (currentCameraIndex === 2 && contactFirstTimeFlash.current) {
+      contactFirstTimeFlash.current = false
+      const meshes = contactAnimationMeshes.current;
+      const animateMeshes = async () => {
+        for (const index in meshes) {
+          const mesh = meshes[index]
+          if (Number(index) > 0) {
+            meshes[Number(index) - 1].visible = false
+          }
+          mesh.visible = true
+
+          // Add timeout between iterations (e.g., 500ms)
+          if (Number(index) < meshes.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+          }
+        }
+      }
+
+      animateMeshes()
+    }
   }, [currentCameraIndex])
 
   useEffect(() => {
@@ -194,7 +216,7 @@ export function Interactions() {
           const contactLinks: Record<string, string> = CONTACT_LINKS
           const url = contactLinks[objectName]
           if (url) {
-            window.open(url, '_blank', 'noopener,noreferrer')
+            window.location.href = url
           }
         } else if (currentCameraIndex === 0 && [
           'BlueprintContent1',
