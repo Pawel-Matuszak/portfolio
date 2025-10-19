@@ -93,7 +93,7 @@ export function Interactions() {
           return
         }
 
-        const flashMaterial = originalMaterial.clone()
+        const flashMaterial: any = originalMaterial.clone()
         if (flashMaterial.color) {
           flashMaterial.color.multiplyScalar(2)
         }
@@ -104,8 +104,8 @@ export function Interactions() {
           const fadeOutDuration = 200 // 200ms fade out
 
           const startTime = Date.now()
-          const originalColor = originalMaterial.color.clone()
-          const flashColor = flashMaterial.color.clone()
+          const originalColor = (originalMaterial as THREE.MeshBasicMaterial).color.clone()
+          const flashColor = (flashMaterial as THREE.MeshBasicMaterial).color.clone()
 
           const animate = () => {
             const elapsed = Date.now() - startTime
@@ -114,8 +114,8 @@ export function Interactions() {
               // Fade in phase
               const progress = elapsed / fadeInDuration
               const currentColor = originalColor.clone().lerp(flashColor, progress)
-              obj.material = originalMaterial.clone()
-              obj.material.color = currentColor
+              obj.material = originalMaterial.clone();
+              (obj.material as any).color = currentColor
               requestAnimationFrame(animate)
             } else if (elapsed < fadeInDuration + holdDuration) {
               // Hold phase
@@ -125,8 +125,8 @@ export function Interactions() {
               // Fade out phase
               const fadeOutProgress = (elapsed - fadeInDuration - holdDuration) / fadeOutDuration
               const currentColor = flashColor.clone().lerp(originalColor, fadeOutProgress)
-              obj.material = originalMaterial.clone()
-              obj.material.color = currentColor
+              obj.material = originalMaterial.clone();
+              (obj.material as any).color = currentColor
               requestAnimationFrame(animate)
             } else {
               // Animation complete - restore original
