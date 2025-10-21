@@ -52,7 +52,7 @@ const SKILL_POSITIONS: Record<number, { x: number; y: number }[]> = {
 const DEFAULT_CONTENT: Record<number, TreeOverlayContent> = {
   4: {
     title: 'RTB House – TypeScript Developer',
-    description: 'AI-focused data pipelines and REST APIs (Python & GCP). Built tracking scripts, crawlers, and reporting tools. Solved complex technical issues.',
+    description: 'Developed an internal AI chat assistant to support daily tasks. Built tracking scripts, crawlers, and reporting scripts.',
     skills: [
       SKILLS_LIST.get('Python') ?? '',
       SKILLS_LIST.get('TypeScript') ?? '',
@@ -61,7 +61,7 @@ const DEFAULT_CONTENT: Record<number, TreeOverlayContent> = {
   },
   3: {
     title: 'Anfata Games – Full Stack Developer',
-    description: 'Enhanced application performance and load times. Fixed critical bugs and improved overall code stability',
+    description: 'Enhanced application performance and fixed critical bugs improving overall code stability. Integrated dynamic user content from a headless CMS.',
     skills: [
       SKILLS_LIST.get('Next.js') ?? '',
       SKILLS_LIST.get('TypeScript') ?? '',
@@ -70,11 +70,12 @@ const DEFAULT_CONTENT: Record<number, TreeOverlayContent> = {
   },
   2: {
     title: 'CeboTech – Python Developer',
-    description: 'Contributed to AI-driven applications. REST API design. Domain-driven architecture. Focused on clean design and scalable solutions.',
+    description: 'Contributed to AI-driven applications. REST API design. Domain-driven architecture. Developed app features to improve small business finance management.',
     skills: [
       SKILLS_LIST.get('Python') ?? '',
       SKILLS_LIST.get('AI') ?? '',
       SKILLS_LIST.get('REST API') ?? '',
+      SKILLS_LIST.get('React') ?? '',
     ]
   },
   1: {
