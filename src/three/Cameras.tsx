@@ -27,7 +27,8 @@ export function Cameras() {
           let newCam: THREE.PerspectiveCamera | null = null
           if (anyChild.isPerspectiveCamera) {
             const aspect = (baseCamera as THREE.PerspectiveCamera).aspect
-            newCam = new THREE.PerspectiveCamera(anyChild.fov, aspect, anyChild.near, anyChild.far)
+            const customFar = 550;
+            newCam = new THREE.PerspectiveCamera(anyChild.fov, aspect, anyChild.near, customFar)
           }
           if (newCam) {
             child.updateMatrixWorld(true)

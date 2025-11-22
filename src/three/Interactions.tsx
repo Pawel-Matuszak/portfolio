@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useCallback } from 'react'
+import { useEffect, useMemo, useRef, useCallback, useState } from 'react'
 import * as THREE from 'three'
 import { useThree, useFrame } from '@react-three/fiber'
+import { Html } from '@react-three/drei'
 import { useScene } from './SceneContext'
 import { BLUEPRINT_LINKS, CONTACT_LINKS } from './sceneConfigs'
 
@@ -21,6 +22,9 @@ export function Interactions() {
     setHoveredWorkshopContent,
     currentCameraIndex
   } = useScene()
+
+  const [hintVisible, setHintVisible] = useState(false)
+  const [hintPos, setHintPos] = useState<THREE.Vector3 | null>(null)
 
   const raycaster = useMemo(() => new THREE.Raycaster(), [])
   const mouse = useMemo(() => new THREE.Vector2(), [])
@@ -76,6 +80,7 @@ export function Interactions() {
   useEffect(() => {
     originalCameraPos.current = null
     toggleTreeContents(false, currentVisibleTreeContent!)
+    setHintVisible(false)
 
     //flash animation for leaves to suggest interactivity on three page
     if (currentCameraIndex === 3 && threeFirstTImeFlash.current) {
@@ -84,6 +89,18 @@ export function Interactions() {
       if (!treeContentsScene) {
         console.log('Tree contents scene not found!')
         return
+      }
+
+      // Show hint
+      const hintLeaf = treeContentsScene.scene.getObjectByName('leaves2')
+      if (hintLeaf) {
+        const pos = new THREE.Vector3()
+        hintLeaf.getWorldPosition(pos)
+        pos.y -= 5
+        pos.z -= 1
+        setHintPos(pos)
+        setHintVisible(true)
+        setTimeout(() => setHintVisible(false), 5000)
       }
 
       // Smooth flash function with gradual transitions
@@ -193,6 +210,10 @@ export function Interactions() {
         //toggle tree contents when clicked on leaves
         //camera index 3
         if (currentCameraIndex === 3 && ['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(objectName)) {
+          if (hintVisible) {
+            setHintVisible(false)
+          }
+
           const leafIndex = Number(objectName.replace('leaves', ''))
           if (currentVisibleTreeContent === leafIndex && treeContentsVisible) {
             toggleTreeContents(false, leafIndex)
@@ -421,6 +442,38 @@ export function Interactions() {
     setTreeContentsVisible(show)
   }
 
-  return null
+  return (
+    <>
+      {hintVisible && hintPos && (
+        <Html
+          position={hintPos}
+          center
+          style={{ pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 100 }}
+        >
+          <div
+            style={{
+              background: 'rgba(0, 0, 0, 0.4)',
+              color: 'white',
+              padding: '8px 16px',
+              borderRadius: '16px',
+              backdropFilter: 'blur(4px)',
+              fontSize: '14px',
+              fontWeight: 500,
+              boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+              animation: 'fadeIn 0.5s ease-out',
+            }}
+          >
+            Click a leaf to explore my experience
+          </div>
+          <style>{`
+            @keyframes fadeIn {
+              from { opacity: 0; transform: translateY(10px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+          `}</style>
+        </Html>
+      )}
+    </>
+  )
 }
 

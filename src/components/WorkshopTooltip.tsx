@@ -58,6 +58,9 @@ export function WorkshopTooltip() {
     const positionUpdateThrottle = useRef(0)
     const POSITION_UPDATE_MS = 33 // ~30fps
 
+    // Keep track of content that matches the position
+    const [displayedContentKey, setDisplayedContentKey] = useState<string | null>(null)
+
     useFrame(() => {
         if (!workshopScene || !hoveredWorkshopContent) return
 
@@ -72,6 +75,9 @@ export function WorkshopTooltip() {
             setCurrentPos(target.clone())
             obj.getWorldQuaternion(quat)
             setCurrentQuat(quat.clone())
+
+            // Sync displayed content with position update
+            setDisplayedContentKey(hoveredWorkshopContent)
         }
     })
 
@@ -80,12 +86,13 @@ export function WorkshopTooltip() {
         if (!hoveredWorkshopContent) {
             setCurrentPos(null)
             setCurrentQuat(null)
+            setDisplayedContentKey(null)
         }
     }, [hoveredWorkshopContent])
 
     // Only show tooltip when in workshop camera (index 0) and hovering over content
     if (currentCameraIndex !== 0 || !hoveredWorkshopContent || !workshopScene ||
-        !currentPos || !currentQuat) return null
+        !currentPos || !currentQuat || displayedContentKey !== hoveredWorkshopContent) return null
 
     const content = WORKSHOP_CONTENT[hoveredWorkshopContent]
     if (!content) return null
@@ -109,6 +116,7 @@ export function WorkshopTooltip() {
                         style={{ pointerEvents: 'none' }}
                     >
                         <div
+                            className="tooltip-container"
                             style={{
                                 alignItems: 'center',
                                 background: 'rgba(0, 0, 0, 0.4)',
@@ -118,7 +126,8 @@ export function WorkshopTooltip() {
                                 padding: '6px 12px',
                                 backdropFilter: 'blur(6px)',
                                 boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
-                                maxWidth: '320px'
+                                maxWidth: '320px',
+                                animation: 'fadeIn 0.2s ease-out forwards'
                             }}
                         >
                             <div style={{
@@ -128,6 +137,12 @@ export function WorkshopTooltip() {
                                 {content.title}
                             </div>
                         </div>
+                        <style>{`
+                            @keyframes fadeIn {
+                                from { opacity: 0; transform: translateY(4px); }
+                                to { opacity: 1; transform: translateY(0); }
+                            }
+                        `}</style>
                     </Html>
                 </group>
             </group>

@@ -6,6 +6,9 @@ import { World } from './World'
 import { Interactions } from './Interactions'
 import { Cameras } from './Cameras'
 import { CameraSwitcher } from './CameraSwitcher'
+import { WaterAnimation } from './WaterAnimation'
+import { WindAnimation } from './WindAnimation'
+import { GradientSky } from './GradientSky'
 import { TreeContentOverlays } from '../components/TreeContentOverlays'
 import { WorkshopTooltip } from '../components/WorkshopTooltip'
 import { LoadingScreen } from '../components/LoadingScreen'
@@ -20,6 +23,8 @@ export function CanvasScene() {
           <World />
           <Interactions />
           <Cameras />
+          <WaterAnimation />
+          <WindAnimation />
           <TreeContentOverlays />
           <WorkshopTooltip />
           {import.meta.env.DEV && (
@@ -35,7 +40,7 @@ export function CanvasScene() {
           )}
           {/* <OrbitControls enableDamping makeDefault /> */}
           {/* <Environment preset="park" background /> */}
-          <color attach="background" args={['#87ceeb']} />
+          <GradientSky />
         </Canvas>
         <LoadingScreen />
         <CameraSwitcher />

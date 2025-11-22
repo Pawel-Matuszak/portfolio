@@ -25,6 +25,8 @@ export function ModelLoader() {
     islandContactOutline,
     navContentMeshes,
     contactAnimationMeshes,
+    waterMeshes,
+    boatMesh,
   } = useScene()
 
   // GLTFs are loaded per-scene below with DRACO configured on each loader instance
@@ -72,9 +74,13 @@ export function ModelLoader() {
                 }
               }
               if (config.sceneUrl.endsWith('nature.glb')) {
-                if (['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(mesh.name)) {
+                if (['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(mesh.name) ||
+                  mesh.name.startsWith('Bush') ||
+                  mesh.name === 'Tree004') {
                   greenSceneMeshes.current.push(mesh)
                     ; (mesh.userData as Record<string, unknown>).originalMaterial = (material).clone()
+                    // Store original rotation for wind animation
+                    ; (mesh.userData as Record<string, unknown>).originalRotation = mesh.rotation.clone()
                 }
               }
               if (config.sceneUrl.endsWith('treeContents.glb')) {
@@ -118,6 +124,50 @@ export function ModelLoader() {
                     ; (mesh.userData as Record<string, unknown>).originalMaterial = cloned
                 }
               }
+              if (config.sceneUrl.endsWith('water.glb')) {
+                mesh.position.y = 0.08;
+                waterMeshes.current.push(mesh);
+                if (mesh.name === 'WaterClose') {
+                  const waterCloseTex = textureLoader.load(`${BASE_URL}static/waterClose.png`)
+                  waterCloseTex.flipY = false
+                  waterCloseTex.colorSpace = THREE.SRGBColorSpace
+                  waterCloseTex.wrapS = THREE.RepeatWrapping
+                  waterCloseTex.wrapT = THREE.RepeatWrapping
+                  mesh.material = new THREE.MeshBasicMaterial({
+                    map: waterCloseTex,
+                    transparent: true,
+                    color: new THREE.Color(0xffffff)
+                  })
+                }
+                if (mesh.name === 'Water') {
+                  const waterCloseTex = textureLoader.load(`${BASE_URL}static/water.png`)
+                  waterCloseTex.flipY = false
+                  waterCloseTex.colorSpace = THREE.SRGBColorSpace
+                  waterCloseTex.wrapS = THREE.RepeatWrapping
+                  waterCloseTex.wrapT = THREE.RepeatWrapping
+                  mesh.material = new THREE.MeshBasicMaterial({
+                    map: waterCloseTex,
+                    transparent: true,
+                    color: new THREE.Color(0xffffff)
+                  })
+                }
+                // Store original vertex positions for wave animation
+                const geometry = mesh.geometry
+                if (geometry && geometry.attributes.position) {
+                  const positions = geometry.attributes.position.array as Float32Array
+                  const originalPositions = new Float32Array(positions)
+                    ; (mesh.userData as Record<string, unknown>).originalPositions = originalPositions
+                }
+              }
+
+              // Find boat mesh
+              if (mesh.name.toLowerCase().includes('boat')) {
+                boatMesh.current = mesh
+                  // Store original rotation for animation
+                  ; (mesh.userData as Record<string, unknown>).originalRotation = mesh.rotation.clone()
+                  ; (mesh.userData as Record<string, unknown>).originalPosition = mesh.position.clone()
+              }
+
               //Group island meshes
               if (config.sceneUrl.endsWith('islandHover.glb')) {
                 if (['Workshop'].includes(mesh.name)) {
@@ -292,6 +342,8 @@ export function ModelLoader() {
     islandContactOutline,
     navContentMeshes,
     contactAnimationMeshes,
+    waterMeshes,
+    boatMesh,
   ])
 
   return null
