@@ -190,11 +190,29 @@ export function Interactions() {
   }, [currentCameraIndex])
 
   useEffect(() => {
-    function onMouseMove(event: MouseEvent) {
-      const rect = (gl.domElement).getBoundingClientRect()
-      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
-      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+    const element = gl.domElement
+
+    const updatePointer = (clientX: number, clientY: number) => {
+      const rect = element.getBoundingClientRect()
+      mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1
+      mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1
     }
+
+    function onPointerMove(event: PointerEvent) {
+      updatePointer(event.clientX, event.clientY)
+    }
+
+    function onPointerDown(event: PointerEvent) {
+      updatePointer(event.clientX, event.clientY)
+    }
+
+    function onPointerUp(event: PointerEvent) {
+      if (event.pointerType === 'touch') {
+        updatePointer(event.clientX, event.clientY)
+        onClick()
+      }
+    }
+
     function onClick() {
       const allMeshes = [
         ...greenSceneMeshes.current,
@@ -260,11 +278,15 @@ export function Interactions() {
       }
     }
 
-    gl.domElement.addEventListener('mousemove', onMouseMove)
-    gl.domElement.addEventListener('click', onClick)
+    element.addEventListener('pointermove', onPointerMove, { passive: true })
+    element.addEventListener('pointerdown', onPointerDown)
+    element.addEventListener('pointerup', onPointerUp)
+    element.addEventListener('click', onClick)
     return () => {
-      gl.domElement.removeEventListener('mousemove', onMouseMove)
-      gl.domElement.removeEventListener('click', onClick)
+      element.removeEventListener('pointermove', onPointerMove)
+      element.removeEventListener('pointerdown', onPointerDown)
+      element.removeEventListener('pointerup', onPointerUp)
+      element.removeEventListener('click', onClick)
     }
   }, [
     gl,
