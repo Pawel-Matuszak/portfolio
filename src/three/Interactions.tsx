@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useCallback, useState } from 'react'
+import { useEffect, useMemo, useRef, useCallback } from 'react'
 import * as THREE from 'three'
 import { useThree, useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
 import { useScene } from './SceneContext'
 import { BLUEPRINT_LINKS, CONTACT_LINKS } from './sceneConfigs'
 
@@ -28,8 +27,6 @@ export function Interactions() {
     islandContactOutline
   } = useScene()
 
-  const [hintVisible, setHintVisible] = useState(false)
-  const [hintPos, setHintPos] = useState<THREE.Vector3 | null>(null)
 
   const raycaster = useMemo(() => new THREE.Raycaster(), [])
   const mouse = useMemo(() => new THREE.Vector2(), [])
@@ -43,6 +40,7 @@ export function Interactions() {
   const originalCameraPos = useRef<THREE.Vector3 | null>(null)
   const hoverEndTime = useRef<number | null>(null)
   const contactFirstTimeFlash = useRef(true)
+  const treeHideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Performance optimization refs
   const raycasterThrottle = useRef(0)
   const RAYCASTER_THROTTLE_MS = 16 // ~60fps
@@ -86,7 +84,6 @@ export function Interactions() {
   useEffect(() => {
     originalCameraPos.current = null
     toggleTreeContents(false, currentVisibleTreeContent!)
-    setHintVisible(false)
 
     // Hide all island outlines when camera changes
     const hideOutline = (outlineRef: React.MutableRefObject<THREE.Group | null>) => {
@@ -112,17 +109,6 @@ export function Interactions() {
         return
       }
 
-      // Show hint
-      const hintLeaf = treeContentsScene.scene.getObjectByName('leaves2')
-      if (hintLeaf) {
-        const pos = new THREE.Vector3()
-        hintLeaf.getWorldPosition(pos)
-        pos.y -= 5
-        pos.z -= 1
-        setHintPos(pos)
-        setHintVisible(true)
-        setTimeout(() => setHintVisible(false), 5000)
-      }
 
       // Smooth flash function with gradual transitions
       const flashLeaf = (obj: THREE.Mesh, delay: number) => {
@@ -247,20 +233,7 @@ export function Interactions() {
       if (intersects.length > 0) {
         const clickedObject = intersects[0].object as THREE.Mesh
         const objectName = clickedObject.name
-        //toggle tree contents when clicked on leaves
-        //camera index 3
-        if (currentCameraIndex === 3 && ['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(objectName)) {
-          if (hintVisible) {
-            setHintVisible(false)
-          }
-
-          const leafIndex = Number(objectName.replace('leaves', ''))
-          if (currentVisibleTreeContent === leafIndex && treeContentsVisible) {
-            toggleTreeContents(false, leafIndex)
-          } else {
-            toggleTreeContents(true, leafIndex)
-          }
-        } else if ([
+        if ([
           'TreeContent1',
           'TreeContent2',
           'TreeContent3',
@@ -403,6 +376,15 @@ export function Interactions() {
         hideOutline(islandContactOutline)
       }
 
+      // Hide tree contents when hover ends on leaves (only if not hovering another leaf)
+      if (['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(hoverState.hovered.name)) {
+        const nextHovered = intersects[0]?.object as THREE.Mesh | undefined
+        const stillHoveringLeaf = nextHovered && ['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(nextHovered.name)
+        if (!stillHoveringLeaf) {
+          toggleTreeContents(false, currentVisibleTreeContent!)
+        }
+      }
+
       updateHoverState(null, null)
       hoverEndTime.current = Date.now()
     }
@@ -410,13 +392,21 @@ export function Interactions() {
       const hovered = intersects[0].object as THREE.Mesh
       //hover effect on leaves
       //camera index 3
-      if (currentCameraIndex === 3 && (hovered.name === 'leaves1' || hovered.name === 'leaves2' || hovered.name === 'leaves3' || hovered.name === 'leaves4' || hovered.name === 'TreeHoverContent')) {
+      if (currentCameraIndex === 3 && ['leaves1', 'leaves2', 'leaves3', 'leaves4', "TreeHoverContent"].includes(hovered.name)) {
         const hoverMaterial = hoverMaterials.get(hovered)
         if (hoverMaterial) {
           hovered.material = hoverMaterial
         }
         gl.domElement.style.cursor = 'pointer'
         updateHoverState(hovered, null)
+
+        // Show tree content on hover
+        if (['leaves1', 'leaves2', 'leaves3', 'leaves4'].includes(hovered.name)) {
+          const leafIndex = Number(hovered.name.replace('leaves', ''))
+          if (currentVisibleTreeContent !== leafIndex) {
+            toggleTreeContents(true, leafIndex)
+          }
+        }
 
         //zoom camera on hover
         //camera index 3
@@ -557,53 +547,41 @@ export function Interactions() {
   function toggleTreeContents(show: boolean, index: number) {
     const treeContentsScene = loadedScenes.find((s) => s.name === 'treeContents-scene')
     if (!treeContentsScene) return
-    treeContentsScene.scene.visible = show
-    for (let i = 1; i <= 4; i++) {
-      const obj = treeContentsScene.scene.getObjectByName(`TreeContent${i}`)
-      if (obj) obj.visible = false
+
+    // Cancel any pending hide
+    if (treeHideTimeout.current) {
+      clearTimeout(treeHideTimeout.current)
+      treeHideTimeout.current = null
     }
+
     if (show) {
+      treeContentsScene.scene.visible = true
+      for (let i = 1; i <= 4; i++) {
+        const obj = treeContentsScene.scene.getObjectByName(`TreeContent${i}`)
+        if (obj) obj.visible = false
+      }
       const target = treeContentsScene.scene.getObjectByName(`TreeContent${index}`)
-      if (target) target.visible = true
+      if (target) {
+        target.visible = true
+      }
       setCurrentVisibleTreeContent(index)
+      setTreeContentsVisible(true)
     } else {
-      setCurrentVisibleTreeContent(null)
+      treeHideTimeout.current = setTimeout(() => {
+        treeContentsScene.scene.visible = false
+        for (let i = 1; i <= 4; i++) {
+          const obj = treeContentsScene.scene.getObjectByName(`TreeContent${i}`)
+          if (obj) obj.visible = false
+        }
+        setCurrentVisibleTreeContent(null)
+        setTreeContentsVisible(false)
+        treeHideTimeout.current = null
+      }, 300)
     }
-    setTreeContentsVisible(show)
   }
 
   return (
-    <>
-      {hintVisible && hintPos && (
-        <Html
-          position={hintPos}
-          center
-          style={{ pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 100 }}
-        >
-          <div
-            style={{
-              background: 'rgba(0, 0, 0, 0.4)',
-              color: 'white',
-              padding: '8px 16px',
-              borderRadius: '16px',
-              backdropFilter: 'blur(4px)',
-              fontSize: '14px',
-              fontWeight: 500,
-              boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
-              animation: 'fadeIn 0.5s ease-out',
-            }}
-          >
-            Click a leaf to explore my experience
-          </div>
-          <style>{`
-            @keyframes fadeIn {
-              from { opacity: 0; transform: translateY(10px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
-          `}</style>
-        </Html>
-      )}
-    </>
+    <></>
   )
 }
 

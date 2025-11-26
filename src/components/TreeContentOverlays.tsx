@@ -173,6 +173,18 @@ export function TreeContentOverlays({
             center
             style={{ pointerEvents: 'none' }}
           >
+            <style>{`
+              @keyframes treeContentAppear {
+                from {
+                  opacity: 0;
+                  transform: scale(0.9) translateY(10px);
+                }
+                to {
+                  opacity: 1;
+                  transform: scale(1) translateY(0);
+                }
+              }
+            `}</style>
             <div
               style={{
                 display: 'flex',
@@ -185,7 +197,10 @@ export function TreeContentOverlays({
                 padding: '12px 14px',
                 backdropFilter: 'blur(6px)',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
-                maxWidth: '320px'
+                maxWidth: '320px',
+                animation: 'treeContentAppear 0.25s ease-out forwards',
+                animationDelay: '50ms',
+                opacity: 0
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -202,7 +217,15 @@ export function TreeContentOverlays({
               </div>
             </div>
             {/* Skills with fixed positioning and curved lines */}
-            <div style={{ position: 'relative', width: '100%', height: '160px', marginTop: '10px' }}>
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              height: '160px',
+              marginTop: '10px',
+              animation: 'treeContentAppear 0.25s ease-out forwards',
+              animationDelay: '150ms',
+              opacity: 0
+            }}>
               {/* SVG for curved lines */}
               <svg
                 style={{
@@ -215,9 +238,9 @@ export function TreeContentOverlays({
                   zIndex: 1
                 }}
               >
-                {content.skills.map((_, index) => {
-                  if (skillPositions.length <= index) return null
-                  const skillPos = skillPositions[index]
+                {content.skills.map((_, skillIndex) => {
+                  if (skillPositions.length <= skillIndex) return null
+                  const skillPos = skillPositions[skillIndex]
                   const startX = 160 // Center of the main content
                   const startY = 0
                   const endX = skillPos.x + 160
@@ -231,7 +254,7 @@ export function TreeContentOverlays({
 
                   return (
                     <path
-                      key={`line-${index}`}
+                      key={`line-${skillIndex}`}
                       d={pathData}
                       stroke="rgba(255, 255, 255, 0.6)"
                       strokeWidth="2"
@@ -243,13 +266,13 @@ export function TreeContentOverlays({
               </svg>
 
               {/* Skills positioned randomly */}
-              {content.skills.map((skillUrl, index) => {
-                if (skillPositions.length <= index) return null
-                const skillPos = skillPositions[index]
+              {content.skills.map((skillUrl, skillIndex) => {
+                if (skillPositions.length <= skillIndex) return null
+                const skillPos = skillPositions[skillIndex]
 
                 return (
                   <div
-                    key={`skill-${index}-${skillUrl}`}
+                    key={`skill-${skillIndex}-${skillUrl}`}
                     style={{
                       position: 'absolute',
                       left: `${skillPos.x + 160 - 41}px`, // Center the image
@@ -260,7 +283,7 @@ export function TreeContentOverlays({
                   >
                     <img
                       src={skillUrl}
-                      alt={`Skill ${index + 1}`}
+                      alt={`Skill ${skillIndex + 1}`}
                       style={{
                         width: 82,
                         height: 82,
