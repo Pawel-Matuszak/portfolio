@@ -37,9 +37,14 @@ export function ModelLoader() {
     let isCancelled = false
     const textureLoader = new THREE.TextureLoader()
 
+    // Initialize loaders once to be reused
+    const draco = new DRACOLoader()
+    draco.setDecoderPath(DRACO_DECODER_PATH)
+    const loader = new GLTFLoader()
+    loader.setDRACOLoader(draco)
+
     async function loadAll() {
-      const results: { name: string; scene: THREE.Group }[] = []
-      for (const config of sceneConfigs) {
+      const promises = sceneConfigs.map(async (config) => {
         try {
           let texture: THREE.Texture | undefined
           if (config.textureUrl) {
@@ -47,12 +52,6 @@ export function ModelLoader() {
             Object.assign(texture, config.textureSettings)
           }
           const material = createMaterialFromTexture(texture)
-
-          // Load GLTF using a fresh loader that already has DRACO
-          const loader = new GLTFLoader()
-          const draco = new DRACOLoader()
-          draco.setDecoderPath(DRACO_DECODER_PATH)
-          loader.setDRACOLoader(draco)
 
           const gltf = await new Promise<THREE.Group>((resolve, reject) => {
             loader.load(
@@ -81,6 +80,15 @@ export function ModelLoader() {
                     ; (mesh.userData as Record<string, unknown>).originalMaterial = (material).clone()
                     // Store original rotation for wind animation
                     ; (mesh.userData as Record<string, unknown>).originalRotation = mesh.rotation.clone()
+                }
+                if (['Post', 'PostSign1', 'PostSign2', 'PostSign3'].includes(mesh.name)) {
+                  navContentMeshes.current.push(mesh)
+                    ; (mesh.userData as Record<string, unknown>).originalMaterial = (material).clone()
+                }
+              }
+              if (config.sceneUrl.endsWith('islandNavigation.glb')) {
+                if (['IslandBanner1', 'IslandBanner2', 'IslandBanner3', 'IslandBannerPost'].includes(mesh.name)) {
+                  navContentMeshes.current.push(mesh);
                 }
               }
               if (config.sceneUrl.endsWith('treeContents.glb')) {
@@ -219,16 +227,29 @@ export function ModelLoader() {
               }
             })
           }
+          if (config.name === 'islandNavigation-scene') {
+            gltf.visible = true
+            gltf.traverse((child: THREE.Object3D) => {
+              if (child instanceof THREE.Mesh && ['IslandBanner1', 'IslandBanner2', 'IslandBanner3', 'IslandBannerPost'].includes(child.name)) {
+                child.visible = false
+              }
+            })
+          }
 
           gltf.position.set(config.position.x, config.position.y, config.position.z)
           gltf.rotation.set(config.rotation.x, config.rotation.y, config.rotation.z)
           gltf.scale.set(config.scale.x, config.scale.y, config.scale.z)
 
-          results.push({ name: config.name, scene: gltf })
+          return { name: config.name, scene: gltf }
         } catch (e) {
           console.error('Failed to load scene config:', config.name, e)
+          return null
         }
-      }
+      })
+
+      const resultsRaw = await Promise.all(promises)
+      const results = resultsRaw.filter((r): r is { name: string; scene: THREE.Group } => r !== null)
+
       // After all scenes loaded, create scaled outline meshes for island groups
       try {
         const outlineMaterial = new THREE.MeshBasicMaterial({
@@ -323,10 +344,14 @@ export function ModelLoader() {
       }
 
       if (!isCancelled) setLoadedScenes(results)
+      draco.dispose()
     }
 
     void loadAll()
-    return () => { isCancelled = true }
+    return () => {
+      isCancelled = true
+      draco.dispose()
+    }
   }, [
     setLoadedScenes,
     greenSceneMeshes,
@@ -348,4 +373,3 @@ export function ModelLoader() {
 
   return null
 }
-

@@ -13,6 +13,7 @@ export function Interactions() {
     workshopContentMeshes,
     contactContentMeshes,
     contactAnimationMeshes,
+    navContentMeshes,
     loadedScenes,
     loadedCameras,
     treeContentsVisible,
@@ -20,7 +21,11 @@ export function Interactions() {
     currentVisibleTreeContent,
     setCurrentVisibleTreeContent,
     setHoveredWorkshopContent,
-    currentCameraIndex
+    currentCameraIndex,
+    setCurrentCameraIndex,
+    islandWorkshopOutline,
+    islandTreeOutline,
+    islandContactOutline
   } = useScene()
 
   const [hintVisible, setHintVisible] = useState(false)
@@ -50,7 +55,8 @@ export function Interactions() {
       ...greenSceneMeshes.current,
       ...treeContentMeshes.current,
       ...workshopContentMeshes.current,
-      ...contactContentMeshes.current
+      ...contactContentMeshes.current,
+      ...navContentMeshes.current
     ]
 
     allMeshes.forEach(mesh => {
@@ -81,6 +87,21 @@ export function Interactions() {
     originalCameraPos.current = null
     toggleTreeContents(false, currentVisibleTreeContent!)
     setHintVisible(false)
+
+    // Hide all island outlines when camera changes
+    const hideOutline = (outlineRef: React.MutableRefObject<THREE.Group | null>) => {
+      if (outlineRef.current) {
+        outlineRef.current.visible = false
+        outlineRef.current.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.visible = false
+          }
+        })
+      }
+    }
+    hideOutline(islandWorkshopOutline)
+    hideOutline(islandTreeOutline)
+    hideOutline(islandContactOutline)
 
     //flash animation for leaves to suggest interactivity on three page
     if (currentCameraIndex === 3 && threeFirstTImeFlash.current) {
@@ -218,7 +239,8 @@ export function Interactions() {
         ...greenSceneMeshes.current,
         ...treeContentMeshes.current,
         ...workshopContentMeshes.current,
-        ...contactContentMeshes.current
+        ...contactContentMeshes.current,
+        ...navContentMeshes.current
       ]
       raycaster.setFromCamera(mouse, camera)
       const intersects = raycaster.intersectObjects(allMeshes)
@@ -255,7 +277,7 @@ export function Interactions() {
           const contactLinks: Record<string, string> = CONTACT_LINKS
           const url = contactLinks[objectName]
           if (url) {
-            window.location.href = url
+            window.open(url, '_blank', 'noopener,noreferrer')
           }
         } else if (currentCameraIndex === 0 && [
           'BlueprintContent1',
@@ -267,6 +289,23 @@ export function Interactions() {
           const url = blueprintLinks[objectName]
           if (url) {
             window.open(url, '_blank', 'noopener,noreferrer')
+          }
+        }
+        else if (currentCameraIndex === 1 && [
+          'IslandBanner1',
+          'IslandBanner2',
+          'IslandBanner3',
+          'PostSign1',
+          'PostSign2',
+          'PostSign3'
+        ].includes(objectName)) {
+          //toggle island navigation when clicked on post signs or banners
+          if (objectName == 'IslandBanner1' || objectName == 'PostSign1') {
+            setCurrentCameraIndex(0)
+          } else if (objectName == 'IslandBanner2' || objectName == 'PostSign2') {
+            setCurrentCameraIndex(3)
+          } else if (objectName == 'IslandBanner3' || objectName == 'PostSign3') {
+            setCurrentCameraIndex(2)
           }
         }
       } else {
@@ -319,7 +358,8 @@ export function Interactions() {
       ...greenSceneMeshes.current,
       ...treeContentMeshes.current,
       ...workshopContentMeshes.current,
-      ...contactContentMeshes.current
+      ...contactContentMeshes.current,
+      ...navContentMeshes.current
     ]
     const camera = loadedCameras[currentCameraIndex]
 
@@ -344,6 +384,23 @@ export function Interactions() {
       // Clear workshop content tooltip if it was showing
       if (hoverState.hovered.name.startsWith('BlueprintContent')) {
         setHoveredWorkshopContent(null)
+      }
+
+      // Hide all island outlines when hover ends
+      if (['IslandBanner1', 'IslandBanner2', 'IslandBanner3', 'PostSign1', 'PostSign2', 'PostSign3'].includes(hoverState.hovered.name)) {
+        const hideOutline = (outlineRef: React.MutableRefObject<THREE.Group | null>) => {
+          if (outlineRef.current) {
+            outlineRef.current.visible = false
+            outlineRef.current.traverse((child) => {
+              if (child instanceof THREE.Mesh) {
+                child.visible = false
+              }
+            })
+          }
+        }
+        hideOutline(islandWorkshopOutline)
+        hideOutline(islandTreeOutline)
+        hideOutline(islandContactOutline)
       }
 
       updateHoverState(null, null)
@@ -430,6 +487,45 @@ export function Interactions() {
         gl.domElement.style.cursor = 'pointer'
         updateHoverState(hovered, originalScale)
       }
+
+      //hover effect on island navigation
+      //camera index 1
+      if (currentCameraIndex === 1 && [
+        'PostSign1',
+        'PostSign2',
+        'PostSign3'
+      ].includes(hovered.name)) {
+        const hoverMaterial = hoverMaterials.get(hovered)
+        if (hoverMaterial) {
+          hovered.material = hoverMaterial
+        }
+        gl.domElement.style.cursor = 'pointer'
+        updateHoverState(hovered, null)
+
+        if (hovered.name === 'PostSign1') {
+          showOutline(islandWorkshopOutline)
+        } else if (hovered.name === 'PostSign2') {
+          showOutline(islandTreeOutline)
+        } else if (hovered.name === 'PostSign3') {
+          showOutline(islandContactOutline)
+        }
+      } else if (currentCameraIndex === 1 && [
+        'IslandBanner1',
+        'IslandBanner2',
+        'IslandBanner3',
+      ].includes(hovered.name)) {
+        console.log(hovered.name)
+        gl.domElement.style.cursor = 'pointer'
+        updateHoverState(hovered, null)
+
+        if (hovered.name === 'IslandBanner1') {
+          showOutline(islandWorkshopOutline)
+        } else if (hovered.name === 'IslandBanner2') {
+          showOutline(islandTreeOutline)
+        } else if (hovered.name === 'IslandBanner3') {
+          showOutline(islandContactOutline)
+        }
+      }
     }
 
     if (!hoverState.hovered && originalCameraPos.current && camera) {
@@ -445,6 +541,18 @@ export function Interactions() {
       // }
     }
   })
+
+  // Show corresponding island outline based on banner
+  const showOutline = (outlineRef: React.MutableRefObject<THREE.Group | null>) => {
+    if (outlineRef.current) {
+      outlineRef.current.visible = true
+      outlineRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.visible = true
+        }
+      })
+    }
+  }
 
   function toggleTreeContents(show: boolean, index: number) {
     const treeContentsScene = loadedScenes.find((s) => s.name === 'treeContents-scene')
