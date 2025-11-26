@@ -4,7 +4,7 @@ import { NavigationBar } from '../components/NavigationBar'
 const cameraNames = {
   'Project Workshop': 0,
   'Experience tree': 3,
-  'About Me': 2,
+  'Contact Me': 2,
 }
 
 export function CameraSwitcher() {
